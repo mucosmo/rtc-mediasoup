@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "unistd.h": "c",
+        "time.h": "c",
+        "iostream": "c",
+        "avformat.h": "c",
+        "swscale.h": "c",
+        "avcodec.h": "c",
+        "imgutils.h": "c",
+        "stdio.h": "c",
+        "avdevice.h": "c",
+        "buffersink.h": "c",
+        "opt.h": "c",
+        "thread": "c",
+        "random": "c",
+        "chrono": "c"
+    }
+}
