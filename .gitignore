@@ -10,3 +10,4 @@ node_modules/
 /files/
 **/*/*.o
 **/*/*.so
+server/packagecache
