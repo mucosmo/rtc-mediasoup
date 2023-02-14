@@ -43,7 +43,10 @@ was compiled against a different Node.js version using
 NODE_MODULE_VERSION 108. This version of Node.js requires
 NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
 the module (for instance, using `npm rebuild` or `npm install`).
-   ```
+```
+1. init_filters() in clan/filter/transcoding.c takes ~200ms, it is intolerable, the time should be reduced to less than 20ms.
+
+2. 
 
 ### 注意
 
