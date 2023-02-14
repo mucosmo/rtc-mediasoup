@@ -12,6 +12,7 @@ $ npm rebuild
 #### server
 ```bash
 $ cd server
+$ git checkout alpha
 $ npm run start
 ```
 
