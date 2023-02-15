@@ -600,7 +600,7 @@ int pushStream(const char *inUrl, const char *outUrl)
     printf("in code id = %d 。 out code id = %d\n", ictx->streams[0]->codecpar->codec_id, octx->streams[0]->codecpar->codec_id);
     printf("in code id = %d 。 out code id = %d\n", ictx->streams[1]->codecpar->codec_id, octx->streams[1]->codecpar->codec_id);
 
-    av_usleep(5000000);
+    // av_usleep(5000000);
 
     if (re < 0)
     {
