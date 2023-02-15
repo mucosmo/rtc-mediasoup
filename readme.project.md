@@ -98,3 +98,7 @@ NODE_MODULE_VERSION 108. This version of Node.js requires
 NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
 the module (for instance, using `npm rebuild` or `npm install`).
 ```
+
+## Logs
+
+* 2023-2-15: both app and server are ok
