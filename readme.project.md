@@ -57,7 +57,11 @@ $ ./shtranscoding.sh
 ```bash
 cd /opt/program/nginx/sbin
 sudo ./nginx -c /opt/program/nginx/conf/nginx.conf
-````
+```
+
+### push/pull stream with rtc room
+
+1. the control server repository is [here](https://github.com/mucosmo/tx-rtcStream)
 
 ## Bugs
 
@@ -68,6 +72,11 @@ sudo ./nginx -c /opt/program/nginx/conf/nginx.conf
 5. ffmpeg 中 scale 的动态参数（n,t,pos）无法使用
 6. filter graph 重新初始化时 n , t 等参数会重新开始
 7. init_filters() in clan/filter/transcoding.c takes ~200ms, it is intolerable, the time should be reduced to less than 20ms.
+
+## Tips
+
+1. free memory when necessary: `sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"`;
+2. kill all process started by gst-launch: `ps -ef | grep gst-launch | awk '{ print $2 }' | xargs kill -9`
 
 ## Notices
 
