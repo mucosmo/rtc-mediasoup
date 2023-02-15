@@ -16,7 +16,7 @@ $ git checkout alpha
 $ npm run start
 ```
 
-#### 视频合成 C 语言实现
+#### 视频合成 (synthesis) C 语言实现
 
 ```bash
 # get into the dir
@@ -28,7 +28,19 @@ $ ./build.sh
 # video composite
 $ ./shtranscoding.sh 
 ```
-#### mediasoup server
+
+### push stream rtmp server
+1. install software  [VLC media player](https://www.videolan.org/vlc/)  and [mediainfo](https://mediaarea.net/en/MediaInfo)
+2. start rtmp server: start nginx with nginx-rtmp-module-master
+```bash
+$ cd /opt/program/nginx/sbin
+$ sudo ./nginx -c /opt/program/nginx/conf/nginx.conf
+````
+3. now rtmp server start at  rtmp://121.5.133.154:1935/myapp/12345
+
+
+
+### mediasoup server
 ```bash
 cd server/
 npm run start
