@@ -1,6 +1,9 @@
 # Installation
-1. cnpm i
-可能需要会卡在某些包无法下载, 可以把预先下载好的包复制到指定文件夹中（ postinstall 时多次尝试复制）
+```bash
+$ git checkout alpha
+$ npm install
+```
+可能在 post install script 阶段卡在某些包无法下载, 可以把预先下载好的包复制到指定文件夹中（ postinstall 时多次尝试复制）
 
 ```bash
 $ rm -r ./node_modules/mediasoup/worker/subprojects/packagecache/*
@@ -21,7 +24,7 @@ $ git checkout alpha
 $ cd app
 $ npm start
 ```
-
+then open the browser and visit `chrome://webrtc-internals/` to see the webrtc status
 
 ### video synthesis in C language
 
@@ -45,16 +48,6 @@ $ sudo ./nginx -c /opt/program/nginx/conf/nginx.conf
 ````
 3. now rtmp server start at  rtmp://121.5.133.154:1935/myapp/12345
 
-
-# Issues in development
-1. npm run start
-```bash
-Error: The module '/opt/application/tx-rtcStream/server/node_modules/.pnpm/heapdump@0.3.15/build/Release/addon.node'
-was compiled against a different Node.js version using
-NODE_MODULE_VERSION 108. This version of Node.js requires
-NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
-the module (for instance, using `npm rebuild` or `npm install`).
-```
 
 
 
@@ -83,4 +76,15 @@ ps -ef | grep gst-launch | awk '{ print $2 }' | xargs kill -9
 ```
 
 * ffmpeg filter 中参数名称可省略，此时需按照默认顺序填写
-* AsrSDK 的输入是 `audio/x-raw,format=S16LE,channels=1,rate=16000` 的 PCM 格式文件（或者其他
+* AsrSDK 的输入是 `audio/x-raw,format=S16LE,channels=1,rate=16000` 的 PCM 格式文件（或者其他）
+
+
+# Issues in development
+1. npm run start
+```bash
+Error: The module '/opt/application/tx-rtcStream/server/node_modules/.pnpm/heapdump@0.3.15/build/Release/addon.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 108. This version of Node.js requires
+NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+```
