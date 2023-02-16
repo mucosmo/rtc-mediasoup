@@ -140,17 +140,17 @@ async function start(roomId, streamAddr) {
         shell: true
       })
 
-      const sessionId = `tx_push_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
-
-      global.processObj[sessionId] = dhcp[roomId].pid;
-
-      return sessionId;
+      const processId = `PROCESSID_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+      global.processObj[processId] = dhcp[roomId].pid;
+      return processId;
 
 }
 
-// 停止推送数字人
- function stop(sessionId) {
-    return kill(sessionId);
+/**
+ * kill process to stop pushing digital human rtmp stream to rtc room
+ */
+ function stop(processId) {
+    return kill(processId);
 }
 
 module.exports = {

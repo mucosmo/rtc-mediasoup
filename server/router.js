@@ -346,8 +346,8 @@ async function createExpressApp() {
         });
 
     /**
-* 从房间会话中生成直播流地址
-*/
+    * 从房间会话中生成直播流地址
+    */
     expressApp.post(
         '/stream/pull/live/stop',
         async (req, res, next) => {
@@ -393,9 +393,9 @@ async function createExpressApp() {
         });
 
 
-            /**
-     * 从房间拉流并进行相应操作（dm/rec/live/mux/transcript)
-     */
+    /**
+    * 从房间拉流并进行相应操作（dm/rec/live/mux/transcript)
+    */
     expressApp.post(
         '/stream/render',
         async (req, res, next) => {
@@ -404,7 +404,7 @@ async function createExpressApp() {
                 const input = '/opt/application/tx-rtcStream/server/clan/filter/input.txt';
                 fs.writeFileSync(input, req.body.text, 'utf8');
 
-                res.status(200).json({text: req.body.text});
+                res.status(200).json({ text: req.body.text });
             }
             catch (error) {
                 next(error);
@@ -413,8 +413,8 @@ async function createExpressApp() {
 
 
     /**
-* 将外部流（数字人）推送到房间
-*/
+    * 将外部流（数字人）推送到房间
+    */
     expressApp.post(
         '/stream/push',
         async (req, res, next) => {
@@ -423,11 +423,8 @@ async function createExpressApp() {
                 const data = req.body;
                 let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
                 const roomId = rooms[roomIdNum - 1]
-
-                const sessionId = await dh.start(roomId, data.streamAddr);
-                console.log(sessionId);
-
-                res.status(200).json({ room: `${data.room}(${roomId})`, streamAddr: data.streamAddr, sessionId });
+                const processId = await dh.start(roomId, data.streamAddr);
+                res.status(200).json({ room: `${data.room}(${roomId})`, streamAddr: data.streamAddr, processId });
             }
             catch (error) {
                 console.log(error)
@@ -438,8 +435,8 @@ async function createExpressApp() {
 
 
     /**
-* 停止会话进程
-*/
+    * 停止会话进程
+    */
     expressApp.post(
         '/stream/session/stop',
         async (req, res, next) => {
