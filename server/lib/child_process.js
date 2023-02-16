@@ -4,15 +4,15 @@ global.processObj = {}
 
 const kill = require('tree-kill');
 
-module.exports = function (sessionId) {
+module.exports = function (broadcasterId) {
 
-    const pid = global.processObj[sessionId]
+    const { pid } = global.processObj[broadcasterId]
     if (pid) {
         kill(pid);
-        delete global.processObj[sessionId];
-        return {sessionId, pid}
-    }else{
-        return `sessionId: ${sessionId} does not exist.`
+        delete global.processObj[broadcasterId];
+        return { broadcasterId, pid }
+    } else {
+        return `broadcasterId: ${broadcasterId} does not exist.`
     }
 
 }

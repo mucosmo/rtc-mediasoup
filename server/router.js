@@ -8,12 +8,10 @@ const bodyParser = require('body-parser');
 const Logger = require('./lib/Logger');
 const logger = new Logger();
 
-const cp = require('child_process');
-
 const { startSync, startAsync } = require('./lib/stream_pipeline/asr');
 const { liveStreamUrl, liveStreamStop, streamComposite } = require('./lib/stream_pipeline/pull');
 
-const dh = require('./lib/stream_pipeline/push');
+const { DigitalHuman } = require('./lib/stream_pipeline/push');
 const fs = require('fs');
 
 async function createExpressApp() {
@@ -76,7 +74,6 @@ async function createExpressApp() {
                         device,
                         rtpCapabilities
                     });
-
                 res.status(200).json(data);
             }
             catch (error) {
@@ -403,10 +400,8 @@ async function createExpressApp() {
         '/stream/render',
         async (req, res, next) => {
             try {
-
                 const input = '/opt/application/tx-rtcStream/server/clan/filter/input.txt';
                 fs.writeFileSync(input, req.body.text, 'utf8');
-
                 res.status(200).json({ text: req.body.text });
             }
             catch (error) {
@@ -425,12 +420,12 @@ async function createExpressApp() {
                 const rooms = Object.keys(global.streamInfo)
                 const data = req.body;
                 let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
-                const roomId = rooms[roomIdNum - 1]
-                const processId = await dh.start(roomId, data.streamAddr);
-                res.status(200).json({ room: `${data.room}(${roomId})`, streamAddr: data.streamAddr, processId });
+                const roomId = rooms[roomIdNum - 1];
+                const dh = new DigitalHuman({ roomId, streamSrc: data.streamSrc });
+                await dh.start();
+                res.status(200).json(dh);
             }
             catch (error) {
-                console.log(error)
                 next(error);
             }
         });
@@ -441,17 +436,11 @@ async function createExpressApp() {
     * 停止会话进程
     */
     expressApp.post(
-        '/stream/session/stop',
+        '/stream/push/stop',
         async (req, res, next) => {
-            try {
-                const sessionId = req.body.sessionId;
-                const result = dh.stop(sessionId);
-                res.status(200).json(result);
-            }
-            catch (error) {
-                console.log(error)
-                next(error);
-            }
+            const { broadcasterId } = req.body;
+            const result = await DigitalHuman.delete(broadcasterId);
+            res.status(200).json(result);
         });
 
 
