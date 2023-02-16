@@ -346,20 +346,17 @@ async function createExpressApp() {
         });
 
     /**
-    * 从房间会话中生成直播流地址
+    * stop the live stream
     */
     expressApp.post(
         '/stream/pull/live/stop',
         async (req, res, next) => {
             try {
-
-                const sessionId = req.body.sessionId;
+                const { sessionId } = req.body;
                 const result = liveStreamStop(sessionId);
-
                 res.status(200).json(result);
             }
             catch (error) {
-                console.log(error)
                 next(error);
             }
         });

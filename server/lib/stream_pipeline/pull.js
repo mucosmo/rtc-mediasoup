@@ -8,7 +8,7 @@ const GStreamerComposite = require('../gstreamer/stream-composite')
 
 const fs = require('fs')
 
-const kill = require('../../lib/child_process')
+const kill = require('tree-kill');
 
 /**
  *  把房间的音视频流转化成直播地址
@@ -30,7 +30,7 @@ module.exports.liveStreamUrl = (roomId, peerId) => {
 
     const filePath = `${recordInfo.fileName}/mediasoup_live.m3u8`
     const sessionId = `tx_live_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
-    global.processObj[sessionId] = global.peer.process._process.pid;
+    global.processObj[sessionId] = { pid: global.peer.process._process.pid };
     return { sessionId, liveUrl: `https://cosmoserver.tk:60125/files/${filePath}` }
 }
 
@@ -52,7 +52,7 @@ module.exports.streamComposite = (roomId, peerId) => {
         }
     }, 1000);
     const sessionId = `tx_composite_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
-    global.processObj[sessionId] = global.peer.process._process.pid;
+    global.processObj[sessionId] = { pid: global.peer.process._process.pid };
     return { sessionId }
 }
 
@@ -60,5 +60,7 @@ module.exports.streamComposite = (roomId, peerId) => {
  *  把房间的音视频流转化成直播地址
  */
 module.exports.liveStreamStop = (sessionId) => {
-    return kill(sessionId)
+    const pid = global.processObj[sessionId].pid
+    kill(pid);
+    return { sessionId, pid };
 }

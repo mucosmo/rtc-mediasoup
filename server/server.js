@@ -5,6 +5,8 @@ process.env.DEBUG = process.env.DEBUG || '*INFO* *WARN* *ERROR*';
 
 const config = require('./config');
 
+global.processObj = {};// global var for tempt use
+
 /* eslint-disable no-console */
 // console.log('process.env.DEBUG:', process.env.DEBUG);
 // console.log('config.js:\n%s', JSON.stringify(config, null, '  '));
