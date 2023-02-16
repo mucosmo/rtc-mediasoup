@@ -9,6 +9,8 @@ const GStreamerComposite = require('../gstreamer/stream-composite')
 const fs = require('fs')
 
 const kill = require('tree-kill');
+const { v4: uuidv4 } = require('uuid');
+
 
 /**
  *  把房间的音视频流转化成直播地址
@@ -29,7 +31,7 @@ module.exports.liveStreamUrl = (roomId, peerId) => {
     }
 
     const filePath = `${recordInfo.fileName}/mediasoup_live.m3u8`
-    const sessionId = `tx_live_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+    const sessionId = `live_stream_${uuidv4()}`;
     global.processObj[sessionId] = { pid: global.peer.process._process.pid };
     return { sessionId, liveUrl: `https://cosmoserver.tk:60125/files/${filePath}` }
 }
@@ -51,7 +53,7 @@ module.exports.streamComposite = (roomId, peerId) => {
             await consumer.requestKeyFrame();
         }
     }, 1000);
-    const sessionId = `tx_composite_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+    const sessionId = `synthesis_stream_${uuidv4()}`;
     global.processObj[sessionId] = { pid: global.peer.process._process.pid };
     return { sessionId }
 }

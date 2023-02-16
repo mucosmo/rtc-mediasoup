@@ -1,7 +1,8 @@
 const axios = require('axios');
 
+const { v4: uuidv4 } = require('uuid');
+
 const cp = require('child_process');
-const kill = require('tree-kill');
 
 const request = axios.create({
     baseURL: 'https://cosmoserver.tk:4443/',
@@ -13,6 +14,7 @@ class DigitalHuman {
         this.roomId = params.roomId;
         this.streamSrc = params.streamSrc;
         this.broadcasterId = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        this.sessionId = 'push_stream_' + uuidv4();
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
         this.rtpParameters = {
@@ -93,7 +95,7 @@ class DigitalHuman {
             },
         })
 
-        global.processObj[this.broadcasterId] = { roomId: this.roomId };
+        global.processObj[this.sessionId] = { roomId: this.roomId, broadcasterId: this.broadcasterId };
     }
 
 
@@ -131,23 +133,9 @@ class DigitalHuman {
             detached: false,
             shell: true
         })
-        global.processObj[this.broadcasterId].pid = dhcp.pid;
+        global.processObj[this.sessionId].pid = dhcp.pid;
     }
 
-    /**
-     * delete broadcaster
-     * */
-    static async delete(broadcasterId) {
-        try {
-            const { roomId, pid } = global.processObj[broadcasterId];
-            await request.delete(`/rooms/${roomId}/broadcasters/${broadcasterId}`);
-            pid && kill(pid);
-            delete global.processObj[broadcasterId];
-            return { broadcasterId, pid }
-        } catch (err) {
-            return err.message;
-        }
-    }
 
 }
 

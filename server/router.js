@@ -12,6 +12,7 @@ const { startSync, startAsync } = require('./lib/stream_pipeline/asr');
 const { liveStreamUrl, liveStreamStop, streamComposite } = require('./lib/stream_pipeline/pull');
 
 const { DigitalHuman } = require('./lib/stream_pipeline/push');
+const { StreamSession } = require('./service/stream-session');
 const fs = require('fs');
 
 async function createExpressApp() {
@@ -345,21 +346,6 @@ async function createExpressApp() {
             }
         });
 
-    /**
-    * stop the live stream
-    */
-    expressApp.post(
-        '/stream/pull/live/stop',
-        async (req, res, next) => {
-            try {
-                const { sessionId } = req.body;
-                const result = liveStreamStop(sessionId);
-                res.status(200).json(result);
-            }
-            catch (error) {
-                next(error);
-            }
-        });
 
     /**
      * 从房间拉流并进行相应操作（dm/rec/live/mux/transcript)
@@ -448,15 +434,18 @@ async function createExpressApp() {
         });
 
 
-
     /**
-    * 停止会话进程
+    * end session
+    * 
+    * the session maybe creted by stream push or live stream etc.
     */
-    expressApp.post(
-        '/stream/push/stop',
+    expressApp.delete(
+        '/stream/session/end',
         async (req, res, next) => {
-            const { broadcasterId } = req.body;
-            const result = await DigitalHuman.delete(broadcasterId);
+            const { sessionId } = req.body;
+
+            const streamSession = new StreamSession({ sessionId });
+            const result = await streamSession.close()
             res.status(200).json(result);
         });
 
