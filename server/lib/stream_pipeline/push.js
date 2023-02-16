@@ -93,6 +93,7 @@ class DigitalHuman {
             },
         })
 
+        global.processObj[this.broadcasterId] = { roomId: this.roomId };
     }
 
 
@@ -130,7 +131,7 @@ class DigitalHuman {
             detached: false,
             shell: true
         })
-        global.processObj[this.broadcasterId] = { roomId: this.roomId, pid: dhcp.pid };
+        global.processObj[this.broadcasterId].pid = dhcp.pid;
     }
 
     /**
@@ -140,7 +141,7 @@ class DigitalHuman {
         try {
             const { roomId, pid } = global.processObj[broadcasterId];
             await request.delete(`/rooms/${roomId}/broadcasters/${broadcasterId}`);
-            kill(pid);
+            pid && kill(pid);
             delete global.processObj[broadcasterId];
             return { broadcasterId, pid }
         } catch (err) {
