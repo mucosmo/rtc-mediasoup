@@ -19,13 +19,16 @@ const fs = require('fs');
 async function createExpressApp() {
     logger.info('creating Express app...');
 
-    expressApp = express();
+    const expressApp = express();
 
     expressApp.use(bodyParser.json());
 
     /**
      * For every API request, verify that the roomId in the path matches and
      * existing room.
+     * 
+     * The expressApp.param() method is a special kind of middleware that is executed for 
+     * a specific parameter in the path of an incoming request. 
      */
     expressApp.param(
         'roomId', (req, res, next, roomId) => {
