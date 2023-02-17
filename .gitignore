@@ -11,3 +11,5 @@ node_modules/
 **/*/*.o
 **/*/*.so
 server/packagecache
+server/clan/filter/filtering_video
+server/clan/filter/transcoding
