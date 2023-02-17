@@ -10,7 +10,7 @@
             "preLaunchTask": "build",
             "request": "launch",
             "program": "${workspaceFolder}/server/clan/filter/transcoding",
-            "args": ["/opt/application/tx-rtcStream/files/resources/screen5s.mp4", "/opt/application/tx-rtcStream/files/composites/c-133.mp4"],
+            "args": ["/opt/application/tx-rtcStream/files/resources/office10s.mp4", "/opt/application/tx-rtcStream/files/synthesis/c-133.mp4"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
