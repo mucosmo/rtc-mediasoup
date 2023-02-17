@@ -13,11 +13,7 @@ const input = '/opt/application/tx-rtcStream/server/clan/input.txt';
 const output = '/opt/application/tx-rtcStream/server/clan/output.txt';
 const me_20s = '/opt/application/tx-rtcStream/files/resources/me_voice_20s.mp4';
 
-const rtmp = 'rtmp://121.5.133.154:1935/myapp/1234';
+const rtmp = 'rtmp://121.5.133.154:1935/myapp/12345';
 
 // filter.avfilter(offiveVideo, input, rtmp);
 filter.pushStream(me_20s, rtmp);
-
-
-
-

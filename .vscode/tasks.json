@@ -19,6 +19,25 @@
 				"isDefault":true
 			},
 			"detail": "编译器: /usr/bin/gcc"
+		},
+		{
+			"type": "shell",
+			"label": "rtp",
+			"command": "/usr/bin/bash",
+			"args": [
+				"/opt/application/tx-rtcStream/server/clan/filter/rtp_build.sh",
+			],
+			"options": {
+				"cwd": "${fileDirname}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault":true
+			},
+			"detail": "编译器: /usr/bin/gcc"
 		}
 	]
 }

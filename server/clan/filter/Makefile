@@ -12,7 +12,8 @@ CFLAGS := $(shell pkg-config --cflags $(FFMPEG_LIBS)) $(CFLAGS)
 LDLIBS := $(shell pkg-config --libs $(FFMPEG_LIBS)) $(LDLIBS)
 
 EXAMPLES=       filtering_video                     \
-                transcoding
+                transcoding                         \
+                send_by_rtp
                
 
 OBJS=$(addsuffix .o,$(EXAMPLES))

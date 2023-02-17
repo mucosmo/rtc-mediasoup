@@ -28,6 +28,31 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "name": "rtp",
+            "type": "cppdbg",
+            "preLaunchTask": "rtp",
+            "request": "launch",
+            "program": "${workspaceFolder}/server/clan/filter/send_by_rtp",
+            "args": ["/opt/application/tx-rtcStream/files/resources/office10s.mp4", "rtmp://121.5.133.154:1935/myapp/12345"],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
         }
 
 
