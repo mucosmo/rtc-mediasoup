@@ -62,7 +62,7 @@ long long prev_pts = 294;
 
 long long t1;
 
-long filter_graph_len=4096; //限制读取长度
+long filter_graph_len = 4096; // 限制读取长度
 
 const char *filterPath = "/opt/application/tx-rtcStream/server/clan/filter/input.txt";
 
@@ -541,6 +541,7 @@ static int init_filters(const char *filter_descr)
     return 0;
 }
 
+// 将数据帧编码打包然后发送
 static int encode_write_frame(unsigned int stream_index, int flush)
 {
     StreamContext *stream = &stream_ctx[stream_index];
@@ -582,6 +583,7 @@ static int encode_write_frame(unsigned int stream_index, int flush)
     return ret;
 }
 
+// 用filtergraph处理一帧数据
 static int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
 {
     FilteringContext *filter = &filter_ctx[stream_index];
@@ -689,16 +691,16 @@ int main(int argc, char **argv)
         const int open = access(filterPath, F_OK); // 10-20 us，可以容忍，相当于每一秒钟（25帧）耽误 500us (0.05%)
 
         // input 文件一直存在时，不断的渲染会导致线程卡死，所以必须在读取 filter graph 后，删除改文件，或者用其他方式通知程序，filter graph 已经更新
-         if (open != -1)
-         {
-             char buff[4096] = {0};
-             FILE *f = fopen(filterPath, "r+");
-             fgets(buff, filter_graph_len, f);
-             fclose(f);
-             remove(filterPath);
-             if ((ret = init_filters(buff)) < 0) // 重新读取文件再次初始化时，需要 154048 us (  0.2秒的延迟无法接受，应当设法减小)
-                 goto end;
-         }
+        if (open != -1)
+        {
+            char buff[4096] = {0};
+            FILE *f = fopen(filterPath, "r+");
+            fgets(buff, filter_graph_len, f);
+            fclose(f);
+            remove(filterPath);
+            if ((ret = init_filters(buff)) < 0) // 重新读取文件再次初始化时，需要 154048 us (  0.2秒的延迟无法接受，应当设法减小)
+                goto end;
+        }
 
         if ((ret = av_read_frame(ifmt_ctx, packet)) < 0)
             break;
@@ -707,6 +709,7 @@ int main(int argc, char **argv)
         av_log(NULL, AV_LOG_DEBUG, "Demuxer gave frame of stream_index %u\n",
                stream_index);
 
+        // 如果有过滤器，就先过滤，再编码
         if (filter_ctx[stream_index].filter_graph)
         {
             StreamContext *stream = &stream_ctx[stream_index];
@@ -737,7 +740,7 @@ int main(int argc, char **argv)
                     goto end;
             }
         }
-        else
+        else // 如果没有过滤器，就直接发送（写入）打包后的数据
         {
             /* remux this frame without reencoding */
             av_packet_rescale_ts(packet,
