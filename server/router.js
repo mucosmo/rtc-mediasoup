@@ -424,7 +424,13 @@ async function createExpressApp() {
                 const data = req.body;
                 let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
                 const roomId = rooms[roomIdNum - 1];
-                const dh = new DigitalHuman({ roomId, streamSrc: data.streamSrc });
+                const dh = new DigitalHuman(
+                    {
+                        roomId,
+                        deviceName: data.deviceName,
+                        displayName: data.displayName
+                    }
+                );
                 await dh.open();
                 res.status(200).json(dh);
             }
@@ -460,7 +466,7 @@ async function createExpressApp() {
             const keys = Object.keys(global.processObj);
             keys.forEach(async (key) => {
                 const streamSession = new StreamSession({ sessionId: key });
-                 await streamSession.close();
+                await streamSession.close();
             })
 
             res.status(200).json(keys);
