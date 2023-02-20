@@ -96,6 +96,20 @@ ps -ef | grep gst-launch | awk '{ print $2 }' | xargs kill -9
 * ffmpeg filter 中参数名称可省略，此时需按照默认顺序填写
 * AsrSDK 的输入是 `audio/x-raw,format=S16LE,channels=1,rate=16000` 的 PCM 格式文件（或者其他）
 
+* generate a rtp strema and replay it
+
+```bash
+$ ffmpeg -re -i 40_input.mp4 -c:v libx264 -preset medium -b:v 1000k -maxrate 1500k -bufsize 2000k -c:a aac -b:a
+ 128k -ac 2 -f rtp rtp://127.0.0.1:5004 -sdp_file 40_input.sdp 
+$ ffplay -protocol_whitelist rtp,udp,file -i 40_input.sdp
+```
+
+* send to rtc room over rtp
+
+```bash
+ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m529869779763201 -map 0:v -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10037
+```
+
 ## Issues in development
 
 1. npm run start
