@@ -99,6 +99,8 @@ ps -ef | grep gst-launch | awk '{ print $2 }' | xargs kill -9
 * generate a rtp strema and replay it
 
 ```bash
+# generate mp4 file
+$ ffmpeg -f lavfi -i testsrc=duration=60:size=320x240:rate=30 -pix_fmt yuv420p -c:v libx264 -preset ultrafast -tune zerolatency 60_input.mp4
 $ ffmpeg -re -i 40_input.mp4 -c:v libx264 -preset medium -b:v 1000k -maxrate 1500k -bufsize 2000k -c:a aac -b:a
  128k -ac 2 -f rtp rtp://127.0.0.1:5004 -sdp_file 40_input.sdp 
 $ ffplay -protocol_whitelist rtp,udp,file -i 40_input.sdp
@@ -107,7 +109,8 @@ $ ffplay -protocol_whitelist rtp,udp,file -i 40_input.sdp
 * send to rtc room over rtp
 
 ```bash
-ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m529869779763201 -map 0:v -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10037
+$ ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m529869779763201 -map 0:v -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10037
+$ ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m577640251523073  -filter_complex '[0:v]boxblur=10:1[v0]' -map [v0] -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10041
 ```
 
 ## Issues in development
