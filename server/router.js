@@ -449,6 +449,24 @@ async function createExpressApp() {
             res.status(200).json(result);
         });
 
+    /**
+    * end all external sessions
+    * 
+    * the session maybe creted by stream push or live stream etc.
+    */
+    expressApp.delete(
+        '/stream/session/end/all',
+        async (req, res, next) => {
+            const keys = Object.keys(global.processObj);
+            keys.forEach(async (key) => {
+                const streamSession = new StreamSession({ sessionId: key });
+                 await streamSession.close();
+            })
+
+            res.status(200).json(keys);
+        });
+
+
 
 
     /**
