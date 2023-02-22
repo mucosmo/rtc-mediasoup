@@ -6,7 +6,7 @@
 			"label": "build",
 			"command": "/usr/bin/bash",
 			"args": [
-				"/opt/application/tx-rtcStream/server/clan/filter/build.sh",
+				"/opt/application/tx-rtcStream/lab/clan/filter/build.sh",
 			],
 			"options": {
 				"cwd": "${fileDirname}"
@@ -25,7 +25,7 @@
 			"label": "rtp",
 			"command": "/usr/bin/bash",
 			"args": [
-				"/opt/application/tx-rtcStream/server/clan/filter/rtp_build.sh",
+				"/opt/application/tx-rtcStream/lab/clan/filter/rtp_build.sh",
 			],
 			"options": {
 				"cwd": "${fileDirname}"
