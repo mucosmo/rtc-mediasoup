@@ -64,7 +64,7 @@ long long t1;
 
 long filter_graph_len = 4096; // 限制读取长度
 
-const char *filterPath = "/opt/application/tx-rtcStream/server/clan/filter/input.txt";
+const char *filterPath = "/opt/application/tx-rtcStream/lab/clan/filter/input.txt";
 
 typedef struct StreamContext
 {
