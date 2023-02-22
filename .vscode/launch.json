@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "fifo",
             "type": "cppdbg",
             "preLaunchTask": "build",
             "request": "launch",
