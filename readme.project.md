@@ -2,8 +2,11 @@
 
 ## Installation
 
+1. server
+
 ```bash
-git checkout alpha
+$ cd server
+$ git checkout alpha
 $ npm install
 ```
 
@@ -13,6 +16,24 @@ $ npm install
 rm -r ./node_modules/mediasoup/worker/subprojects/packagecache/*
 $ cp ./packagecache/* ./node_modules/mediasoup/worker/subprojects/packagecache
 $ npm rebuild
+```
+
+2. app
+
+```bash
+$ cd app
+$ git checkout alpha
+$ npm install
+```
+
+可能报错：
+>Invalid tag name ">=^16.0.0": Tags may not have any characters that encodeURIComponent encodes. package: mediasoup-demo-app@3.0.0 › react-tooltip@^3.11.1 › react
+
+解决方法：
+
+```bash
+$ npm config set registry https://registry.npmmirror.com
+$ npm i --legacy-peer-deps
 ```
 
 ## Run
@@ -124,6 +145,8 @@ NODE_MODULE_VERSION 108. This version of Node.js requires
 NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
 the module (for instance, using `npm rebuild` or `npm install`).
 ```
+
+2. app -> npm start failed 
 
 ## Logs
 
