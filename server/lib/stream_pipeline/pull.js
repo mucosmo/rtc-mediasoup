@@ -33,7 +33,7 @@ module.exports.liveStreamUrl = (roomId, peerId) => {
     const filePath = `${recordInfo.fileName}/mediasoup_live.m3u8`
     const sessionId = `live_stream_${uuidv4()}`;
     global.processObj[sessionId] = { pid: global.peer.process._process.pid };
-    return { sessionId, liveUrl: `https://cosmoserver.tk:60125/files/${filePath}` }
+    return { sessionId, liveUrl: `https://cosmoserver.tk:60125/files/m3u8/${filePath}` }
 }
 
 
