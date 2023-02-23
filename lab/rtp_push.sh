@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
 ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m688346523238401  -filter_complex '[0:v]boxblur=3:1,drawtext=textfile=/opt/application/tx-rtcStream/files/resources/drawtext.txt:reload=1:fontfile=/usr/share/fonts/chinese/SIMKAI.TTF:x=(w-text_w)/2:y=h-80*t:fontcolor=white:fontsize=40:shadowx=2:shadowy=20[v0]' -map [v0] -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10024
-ffmpeg -re -protocol_whitelist file -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -filter_complex '[0:v]boxblur=3:1[v0]' -map [v0] -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp  rtp://121.5.133.154:10003
+
+## RTP 视频传输
+ffmpeg -re -protocol_whitelist file -i /opt/application/tx-rtcStream/files/resources/office10s.mp4 -filter_complex '[0:v]boxblur=3:1[v0]' -map [v0] -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp  rtp://121.5.133.154:10032
+## RTP 音频传输
+ffmpeg -re -protocol_whitelist file -i /opt/application/tx-rtcStream/files/resources/16k-1-mp3.mp3  -vn -b:a 16000  -deadline 1 -cpu-used 4 -ssrc 1111 -payload_type 100 -f rtp  rtp://121.5.133.154:10066
+## （简化后）RTP视频传输
+ffmpeg -re -protocol_whitelist file -i /opt/application/tx-rtcStream/files/resources/office10s.mp4 -filter_complex '[0:v]boxblur=3:1[v0]' -map [v0] -c:v vp8 -b:v 1000k  -ssrc 2222 -payload_type 101 -f rtp  rtp://121.5.133.154:10016
+
+
+
 
 ffmpeg -re -protocol_whitelist file -i /opt/application/tx-rtcStream/server/clan/filter/40_input.mp4 -map 0:v -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp -packet_size 1400 -flush_packets 1 rtp://121.5.133.154:10044
 ffmpeg -re -fflags +genpts -protocol_whitelist file -i /opt/application/tx-rtcStream/server/clan/filter/40_input.mp4 -map 0:v -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp -packet_size 1400 -flush_packets 1 rtp://121.5.133.154:10013
