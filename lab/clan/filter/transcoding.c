@@ -196,6 +196,10 @@ static int open_output_file(const char *filename)
     unsigned int i;
 
     ofmt_ctx = NULL;
+    // AVOutputFormat *fmt = av_guess_format("rtp", NULL, NULL);
+
+    // const char *filename = "rtp://121.5.133.154:10015";
+    // ret = avformat_alloc_output_context2(&ofmt_ctx, fmt, fmt->name, filename);
     avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     // avformat_alloc_output_context2(&ofmt_ctx, 0, "flv", filename);
     if (!ofmt_ctx)
@@ -247,6 +251,9 @@ static int open_output_file(const char *filename)
                     enc_ctx->pix_fmt = dec_ctx->pix_fmt;
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 enc_ctx->time_base = av_inv_q(dec_ctx->framerate);
+                // // out_stream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+                // out_stream->codecpar->codec_id = AV_CODEC_ID_VP8;
+                // out_stream->codecpar->bit_rate = 1000000;
             }
             else
             {
@@ -309,6 +316,10 @@ static int open_output_file(const char *filename)
     }
 
     /* init muxer, write output file header */
+    // AVDictionary *opts = NULL;
+    // av_dict_set(&opts, "ssrc", "2222", 0);
+    // av_dict_set(&opts, "payload_type", "101", 0);
+    // ret = avformat_write_header(ofmt_ctx, &opts);
     ret = avformat_write_header(ofmt_ctx, NULL);
     if (ret < 0)
     {
