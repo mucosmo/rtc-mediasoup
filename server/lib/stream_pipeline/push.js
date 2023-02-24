@@ -132,8 +132,8 @@ class DigitalHuman {
         const dhcp = cp.spawn(command, {
             detached: false,
             shell: true
-        })
-        global.processObj[this.sessionId].pid = dhcp.pid;
+        });
+        // global.processObj[this.sessionId].pid = dhcp.pid;
     }
 
 

@@ -13,6 +13,7 @@ const { liveStreamUrl, liveStreamStop, streamComposite } = require('./lib/stream
 
 const { DigitalHuman } = require('./lib/stream_pipeline/push');
 const { StreamSession } = require('./service/stream-session');
+const { FfmpegCommand } = require('./service/ffmpeg');
 const fs = require('fs');
 
 async function createExpressApp() {
@@ -383,7 +384,7 @@ async function createExpressApp() {
         '/stream/render',
         async (req, res, next) => {
             try {
-                const input = '/opt/application/tx-rtcStream/server/clan/filter/input.txt';
+                const input = '/opt/application/tx-rtcStream/lab/clan/filter/input.txt';
                 fs.writeFileSync(input, req.body.text, 'utf8');
                 res.status(200).json({ text: req.body.text });
             }
@@ -464,6 +465,8 @@ async function createExpressApp() {
         '/stream/session/end/all',
         async (req, res, next) => {
             const keys = Object.keys(global.processObj);
+
+            console.log(keys)
             keys.forEach(async (key) => {
                 const streamSession = new StreamSession({ sessionId: key });
                 await streamSession.close();
@@ -472,7 +475,35 @@ async function createExpressApp() {
             res.status(200).json(keys);
         });
 
+    /**
+    * open the transport channel for stream push
+    */
+    expressApp.post(
+        '/stream/ffmpeg/rtp/room',
+        async (req, res, next) => {
+            try {
+                const rooms = Object.keys(global.streamInfo)
+                const data = req.body;
+                let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
+                const roomId = rooms[roomIdNum - 1];
+                const dh = new DigitalHuman(
+                    {
+                        roomId,
+                        deviceName: data.deviceName,
+                        displayName: data.displayName
+                    }
+                );
+                await dh.open();
 
+                const ffmpeg = new FfmpegCommand(data.params, dh);
+                await ffmpeg.rtpRoom();
+
+                res.status(200).json(dh);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
 
 
     /**

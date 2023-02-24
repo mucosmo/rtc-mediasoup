@@ -66,6 +66,10 @@ let nextMediasoupWorkerIdx = 0;
 
 run();
 
+process.on('uncaughtException', (error) => {
+	console.error('uncaughtException: %s', String(error));
+});
+
 async function run() {
 	// Open the interactive server.
 	await interactiveServer();
