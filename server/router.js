@@ -484,7 +484,7 @@ async function createExpressApp() {
             try {
                 const rooms = Object.keys(global.streamInfo)
                 const data = req.body;
-                let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
+                let roomIdNum = Number(data.room.slice(-1) || 1) // 前端传递的伪数据
                 const roomId = rooms[roomIdNum - 1];
                 const dh = new DigitalHuman(
                     {
@@ -513,9 +513,7 @@ async function createExpressApp() {
         (error, req, res, next) => {
             if (error) {
                 logger.warn('Express app %s', String(error));
-
                 error.status = error.status || (error.name === 'TypeError' ? 400 : 500);
-
                 res.statusMessage = error.message;
                 res.status(error.status).send(String(error));
             }

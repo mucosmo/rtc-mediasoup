@@ -15,12 +15,12 @@ class FfmpegCommand {
     async rtpRoom() {
         const command = [
             `ffmpeg -re`,
-            ` -i /opt/application/tx-rtcStream/files/resources/20_input.mp4`,
+            ` -i /opt/application/tx-rtcStream/files/resources/${this.args.background}`,
             ` -filter_complex_script /opt/application/tx-rtcStream/lab/clan/filter/input.txt`,
-            ` -map [v0] -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 `,
+            ` -an -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 `,
             ` -ssrc 2222 -payload_type 101 -f rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}`
         ].join('');
-        console.info('start to exec ffmpeg command:')
+        console.info('start to execute ffmpeg command:')
         console.log(command)
         exec(command, (err, stdout, stderr) => {
             if (err) {
