@@ -131,3 +131,14 @@ end_time=$(date +%s)
 
 
 echo shell-execution time was `expr $end_time - $timestamp` s
+
+
+
+## 左右两个视频对比
+ffmpeg -i 10_input.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]scale=640x480,setsar=1,pad=1280:480:0:0[v0];[v1]scale=640x480,setsar=1, hue=s=0,boxblur=3:1[v1];[v0][v1]overlay=w" -c:a copy -y 10_output.mp4 
+
+ffmpeg -i forest.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]pad=2732:720:0:0[v0];[v1]hue=s=0,boxblur=3:1[v1];[v0][v1]overlay=w" -c:a copy -y forest_splitter_output.mp4 
+
+ffmpeg -i forest.mp4 -i forest_output.mp4 -filter_complex "[0]pad=2732:720:0:0[v0];[v0][1]overlay=w" -c:a copy -y forest_splitter_output.mp4
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/office30s.mp4 -i rtmp://liveplay.ivh.qq.com/live/m1568283098611713 -filter_complex "[0:v][1:v]overlay=20:20" -an -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 -ssrc 2222 -payload_type 101 -f rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}
