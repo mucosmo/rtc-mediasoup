@@ -495,7 +495,7 @@ async function createExpressApp() {
                 );
                 await dh.open();
 
-                const ffmpeg = new FfmpegCommand(data.params, dh);
+                const ffmpeg = new FfmpegCommand(data.params, data.inputs, dh);
                 await ffmpeg.rtpRoom();
 
                 res.status(200).json(dh);
