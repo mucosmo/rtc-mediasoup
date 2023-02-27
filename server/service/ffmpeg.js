@@ -37,9 +37,9 @@ class FfmpegCommand {
             console.error('ffmpeg::process::error [pid:%d, message:%o]', cp.pid, err)
         )
 
-        // cp.stderr.on('data', data =>
-        //     console.log('err:' + data)
-        // )
+        cp.stderr.on('data', data =>
+            console.log('err:' + data)
+        )
 
         cp.stdout.on('data', data =>
             console.log('data:' + data)

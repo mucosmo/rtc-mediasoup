@@ -142,3 +142,7 @@ ffmpeg -i forest.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]pad=2732:720:0:0[
 ffmpeg -i forest.mp4 -i forest_output.mp4 -filter_complex "[0]pad=2732:720:0:0[v0];[v0][1]overlay=w" -c:a copy -y forest_splitter_output.mp4
 
 ffmpeg -i /opt/application/tx-rtcStream/files/resources/office30s.mp4 -i rtmp://liveplay.ivh.qq.com/live/m1568283098611713 -filter_complex "[0:v][1:v]overlay=20:20" -an -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 -ssrc 2222 -payload_type 101 -f rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}
+
+
+## 淡入淡出
+ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]fade=in:st=0:d=5,scale=200:-1[v1];[0:v][v1]overlay=10:10" -pix_fmt yuv420p -c:a copy -t 10 -y forest_image_fade.mp4
