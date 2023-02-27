@@ -25,9 +25,9 @@ class FfmpegCommand {
             ` rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}`
         ].join('');
 
-        console.log(command)
-
         const cp = exec(command);
+
+        global.processObj[this.sessionId] = { pid: cp.pid };
 
         cp.on('message', message =>
             console.log('ffmpeg::process::message [pid:%d, message:%o]', cp.pid, message)

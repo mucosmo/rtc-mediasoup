@@ -465,13 +465,10 @@ async function createExpressApp() {
         '/stream/session/end/all',
         async (req, res, next) => {
             const keys = Object.keys(global.processObj);
-
-            console.log(keys)
             keys.forEach(async (key) => {
                 const streamSession = new StreamSession({ sessionId: key });
                 await streamSession.close();
             })
-
             res.status(200).json(keys);
         });
 
