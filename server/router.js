@@ -491,10 +491,10 @@ async function createExpressApp() {
                     }
                 );
                 await dh.open();
-
-                const ffmpeg = new FfmpegCommand(data.params, data.inputs, dh);
+                const command = data.commandWithoutChannel + ` -f rtp rtp://${dh.videoTransport.ip}:${dh.videoTransport.port}`;
+                
+                const ffmpeg = new FfmpegCommand(command);
                 await ffmpeg.rtpRoom();
-
                 res.status(200).json(dh);
             }
             catch (error) {

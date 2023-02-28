@@ -6,36 +6,14 @@ const { StreamSession } = require('./stream-session');
 
 
 class FfmpegCommand {
-    constructor(ffmpegArgs, inputs, channel) {
-        this.args = ffmpegArgs;
-        this.inputs = inputs;
-        this.channel = channel;
+    constructor(command) {
+        this.command = command;
         this.sessionId = 'push_stream_' + uuidv4();
     }
 
     async rtpRoom() {
-
-        const globalOptions = this.args.globalOptions && this.args.globalOptions.length > 0 ? ' ' + this.args.globalOptions.join(' ') : '';
-        const outputOpts = this.args.outputOptions && this.args.outputOptions.length > 0 ? ' ' + this.args.outputOptions.join(' ') : '';
-
-        const inputs = this.inputs.map(input => ` ${input.options ? input.options.join(' ') : ''} -i ${input.src.path}`);
-        const command = [
-            `ffmpeg`,
-            globalOptions,
-            ` -i /opt/application/tx-rtcStream/files/resources/${this.args.background}`,
-            ...inputs,
-            ` -filter_complex_script /opt/application/tx-rtcStream/lab/clan/filter/input.txt`,
-            outputOpts,
-            ` -an -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 -ssrc 2222 -payload_type 101`,
-            ` -f rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}`
-        ].join('');
-
-        console.log(command)
-
-        const cp = exec(command);
-
+        const cp = exec(this.command);
         global.processObj[this.sessionId] = { pid: cp.pid };
-
         cp.on('message', message =>
             console.log('ffmpeg::process::message [pid:%d, message:%o]', cp.pid, message)
         )
