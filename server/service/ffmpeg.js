@@ -15,15 +15,22 @@ class FfmpegCommand {
 
     async rtpRoom() {
 
-        const inputs = this.inputs.map(input => ` -i ${input}`);
+        const globalOptions = this.args.globalOptions && this.args.globalOptions.length > 0 ? ' ' + this.args.globalOptions.join(' ') : '';
+        const outputOpts = this.args.outputOptions && this.args.outputOptions.length > 0 ? ' ' + this.args.outputOptions.join(' ') : '';
+
+        const inputs = this.inputs.map(input => ` ${input.options ? input.options.join(' ') : ''} -i ${input.src.path}`);
         const command = [
-            `ffmpeg -re`,
+            `ffmpeg`,
+            globalOptions,
             ` -i /opt/application/tx-rtcStream/files/resources/${this.args.background}`,
             ...inputs,
             ` -filter_complex_script /opt/application/tx-rtcStream/lab/clan/filter/input.txt`,
-            ` -an -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 -ssrc 2222 -payload_type 101 -f`,
-            ` rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}`
+            outputOpts,
+            ` -an -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 -ssrc 2222 -payload_type 101`,
+            ` -f rtp rtp://${this.channel.videoTransport.ip}:${this.channel.videoTransport.port}`
         ].join('');
+
+        console.log(command)
 
         const cp = exec(command);
 
