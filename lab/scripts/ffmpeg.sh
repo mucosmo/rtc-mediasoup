@@ -146,3 +146,7 @@ ffmpeg -i /opt/application/tx-rtcStream/files/resources/office30s.mp4 -i rtmp://
 
 ## 淡入淡出
 ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]fade=in:st=0:d=5,scale=200:-1[v1];[0:v][v1]overlay=10:10" -pix_fmt yuv420p -c:a copy -t 10 -y forest_image_fade.mp4
+
+
+## 持续一段时间后消失
+ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]trim=duration=5,scale=640x360[v1];[0:v][v1]overlay=10:10:enable='between(t,0,5)'" -pix_fmt yuv420p -c:a copy forest_overlay_trim.mp4
