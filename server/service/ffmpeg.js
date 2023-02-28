@@ -6,8 +6,9 @@ const { StreamSession } = require('./stream-session');
 
 
 class FfmpegCommand {
-    constructor(command) {
+    constructor(command,channel) {
         this.command = command;
+        this.channel = channel;
         this.sessionId = 'push_stream_' + uuidv4();
     }
 

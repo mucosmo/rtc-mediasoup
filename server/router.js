@@ -492,8 +492,8 @@ async function createExpressApp() {
                 );
                 await dh.open();
                 const command = data.commandWithoutChannel + ` -f rtp rtp://${dh.videoTransport.ip}:${dh.videoTransport.port}`;
-                
-                const ffmpeg = new FfmpegCommand(command);
+
+                const ffmpeg = new FfmpegCommand(command, dh);
                 await ffmpeg.rtpRoom();
                 res.status(200).json(dh);
             }
