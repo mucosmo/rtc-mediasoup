@@ -150,3 +150,8 @@ ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]fade=in:st=
 
 ## 持续一段时间后消失
 ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]trim=duration=5,scale=640x360[v1];[0:v][v1]overlay=10:10:enable='between(t,0,5)'" -pix_fmt yuv420p -c:a copy forest_overlay_trim.mp4
+
+
+# 转场 
+# 需要先统一处理图片至相同的 DAR (scale=1200:600) 和 SAR (setsar=1:1)
+ffmpeg -loop 1 -t 5 -i image1.jpg -loop 1 -t 5 -i image2.jpg -loop 1 -t 5 -i image3.jpg -loop 1 -t 5 -i image4.jpg -filter_complex "[0:v]fade=t=out:st=4:d=1[v0];[1:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v1];[2:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v2];[3:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v3];[v0][v1][v2][v3]concat=n=4:v=1:a=0,format=yuv420p[v]" -map "[v]" -y out.mp4
