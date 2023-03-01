@@ -6,9 +6,9 @@ const { StreamSession } = require('./stream-session');
 
 
 class FfmpegCommand {
-    constructor(command,channel) {
+    constructor(command,channelSessionId) {
         this.command = command;
-        this.channel = channel;
+        this.channelSessionId = channelSessionId;
         this.sessionId = 'push_stream_' + uuidv4();
     }
 
@@ -39,7 +39,8 @@ class FfmpegCommand {
     }
 
     async closeSession() {
-        const streamSession = new StreamSession({ sessionId: this.channel.sessionId });
+        console.log(this.channelSessionId)
+        const streamSession = new StreamSession({ sessionId: this.channelSessionId });
         await streamSession.close();
     }
 }

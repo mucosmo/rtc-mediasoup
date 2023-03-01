@@ -479,23 +479,10 @@ async function createExpressApp() {
         '/stream/ffmpeg/rtp/room',
         async (req, res, next) => {
             try {
-                const rooms = Object.keys(global.streamInfo)
                 const data = req.body;
-                let roomIdNum = Number(data.room.slice(-1) || 1) // 前端传递的伪数据
-                const roomId = rooms[roomIdNum - 1];
-                const dh = new DigitalHuman(
-                    {
-                        roomId,
-                        deviceName: data.deviceName,
-                        displayName: data.displayName
-                    }
-                );
-                await dh.open();
-                const command = data.commandWithoutChannel + ` -f rtp rtp://${dh.videoTransport.ip}:${dh.videoTransport.port}`;
-
-                const ffmpeg = new FfmpegCommand(command, dh);
+                const ffmpeg = new FfmpegCommand(data.command, data.channelSessionId);
                 await ffmpeg.rtpRoom();
-                res.status(200).json(dh);
+                res.status(200).json(ffmpeg);
             }
             catch (error) {
                 next(error);
