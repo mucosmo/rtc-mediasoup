@@ -25,8 +25,8 @@ module.exports =
 		// NOTE: Set your own valid certificate files.
 		tls        :
 		{
-			cert : `/etc/nginx/certs/cosmoservertk.pem`, // 证书
-			key  : `/etc/nginx/certs/cosmoservertk.key`
+			cert : `/etc/nginx/certs/chaosyhy.com_nginx/chaosyhy.com.pem`, // 证书
+			key  : `/etc/nginx/certs/chaosyhy.com_nginx/chaosyhy.com.key`
 		}
 	},
 	// mediasoup settings.

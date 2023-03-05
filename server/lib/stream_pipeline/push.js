@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const cp = require('child_process');
 
 const request = axios.create({
-    baseURL: 'https://cosmoserver.tk:4443/',
+    baseURL: 'https://chaosyhy.com:4443/',
     timeout: 10000,
 });
 

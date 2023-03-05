@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SERVER_URL=https://cosmoserver.tk:4443
+SERVER_URL=https://chaosyhy.com:4443
 ROOM_ID=zdwiu3he
 MEDIA_FILE=$1
 
