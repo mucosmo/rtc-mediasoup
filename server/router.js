@@ -491,6 +491,36 @@ async function createExpressApp() {
 
 
     /**
+* open the transport channel for stream push
+*/
+    expressApp.post(
+        '/rooms/stats',
+        async (req, res, next) => {
+            const rtc = []
+            try {
+                for (const theRoom of global.rooms.values()) {
+                    const roomId = theRoom._roomId;
+                    const room = rtc.find(r => r.room === roomId);
+                    const members = theRoom._protooRoom.peers.map(peer => peer._id);
+                    if (!room) {
+                        rtc.push({
+                            room: roomId,
+                            members
+                        })
+                    } else {
+                        room.members.push(...members);
+                        rtc.push(room)
+                    }
+                }
+                res.status(200).json(rtc);
+            }
+            catch (error) {
+                next(error);
+            }
+        });
+
+
+    /**
      * Error handler.
      */
     expressApp.use(
