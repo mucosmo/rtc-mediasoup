@@ -98,7 +98,7 @@ async function run() {
 		for (const room of rooms.values()) {
 			room.logStatus();
 		}
-	}, 120000);
+	}, 12000);
 }
 
 /**
