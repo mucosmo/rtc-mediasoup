@@ -245,7 +245,7 @@ class Room extends EventEmitter
 			if (this._closed)
 				return;
 
-			logger.debug('protoo Peer "close" event [peerId:%s]', peer.id);
+			logger.info('protoo Peer "close" event [peerId:%s]', peer.id);
 
 			// If the Peer was joined, notify all Peers.
 			if (peer.data.joined)
