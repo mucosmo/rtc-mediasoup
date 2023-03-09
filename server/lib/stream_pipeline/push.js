@@ -1,5 +1,7 @@
 const axios = require('axios');
 
+const protooClient = require('protoo-client');
+
 const { v4: uuidv4 } = require('uuid');
 
 const cp = require('child_process');
@@ -9,11 +11,13 @@ const request = axios.create({
     timeout: 10000,
 });
 
+global.dh = new Map();
+
 class DigitalHuman {
     constructor(params) {
         this.roomId = params.roomId;
         this.streamSrc = params.streamSrc;
-        this.broadcasterId = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        this.broadcasterId = 'node_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
         this.sessionId = 'push_stream_' + uuidv4();
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
@@ -25,12 +29,22 @@ class DigitalHuman {
         };
         this.videoTransport = null;
         this.audioTransport = null;
+
+        this.client = null;
+
+        this.protooUrl = `wss://chaosyhy.com:4443/?roomId=${this.roomId}&peerId=${this.broadcasterId}`
     }
 
     /**
      * open the transport channel to ready for stream pushing
      */
     async open() {
+        const protooTransport = new protooClient.WebSocketTransport(this.protooUrl);
+
+        this.client = new protooClient.Peer(protooTransport);
+
+        global.dh.set(this.sessionId, this.client);
+
         // 验证房间是否存在
         await request.get(`/rooms/${this.roomId}`);
         // 创建数字人
@@ -136,6 +150,10 @@ class DigitalHuman {
         // global.processObj[this.sessionId].pid = dhcp.pid;
     }
 
+
+    async close() {
+        this.client.close();
+    }
 
 }
 

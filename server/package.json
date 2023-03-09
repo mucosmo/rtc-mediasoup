@@ -24,6 +24,7 @@
     "mediasoup": "^3.10.12",
     "node-rtsp-stream": "^0.0.9",
     "pidusage": "^2.0.21",
+    "protoo-client": "^4.0.6",
     "protoo-server": "^4.0.5",
     "ref-array-napi": "^1.2.2",
     "ref-napi": "^3.0.3",

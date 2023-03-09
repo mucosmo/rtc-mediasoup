@@ -39,7 +39,7 @@ class FfmpegCommand {
     }
 
     async closeSession() {
-        console.log(this.channelSessionId)
+        global.dh.get(this.channelSessionId).close();
         const streamSession = new StreamSession({ sessionId: this.channelSessionId });
         await streamSession.close();
     }
