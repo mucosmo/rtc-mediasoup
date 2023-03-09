@@ -400,16 +400,17 @@ async function createExpressApp() {
     expressApp.post(
         '/stream/push',
         async (req, res, next) => {
+            let nodepeer= null;
             try {
                 const data = req.body;
-                const roomId = data.room;
-                const dh = new NodePeer({ roomId, streamSrc: data.streamSrc });
-                await dh.createRoom();
-                await dh.joinRoom();
-                await dh.startPush();
-                res.status(200).json(dh);
+                const nodepeer = new NodePeer(data);
+                await nodepeer.createRoom();
+                await nodepeer.joinRoom();
+                await nodepeer.startPush();
+                res.status(200).json(nodepeer);
             }
             catch (error) {
+                await nodepeer.close();
                 next(error);
             }
         });
@@ -420,16 +421,16 @@ async function createExpressApp() {
     expressApp.post(
         '/stream/push/open',
         async (req, res, next) => {
-            let dh = null;
+            let nodepeer = null;
             try {
                 const data = req.body;
-                dh = new NodePeer(data);
-                await dh.createRoom();
-                await dh.joinRoom();
-                res.status(200).json(dh);
+                nodepeer = new NodePeer(data);
+                await nodepeer.createRoom();
+                await nodepeer.joinRoom();
+                res.status(200).json(nodepeer);
             }
             catch (error) {
-                await dh.close();
+                await nodepeer.close();
                 next(error);
             }
         });
