@@ -418,10 +418,11 @@ async function createExpressApp() {
     expressApp.post(
         '/stream/push/open',
         async (req, res, next) => {
+            let dh = null;
             try {
                 const data = req.body;
                 const roomId = data.room;
-                const dh = new DigitalHuman(
+                dh = new DigitalHuman(
                     {
                         roomId,
                         deviceName: data.deviceName,
@@ -432,6 +433,7 @@ async function createExpressApp() {
                 res.status(200).json(dh);
             }
             catch (error) {
+                await dh.close();
                 next(error);
             }
         });
