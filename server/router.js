@@ -11,7 +11,7 @@ const logger = new Logger();
 const { startSync, startAsync } = require('./lib/stream_pipeline/asr');
 const { liveStreamUrl, liveStreamStop, streamComposite } = require('./lib/stream_pipeline/pull');
 
-const { DigitalHuman } = require('./lib/stream_pipeline/push');
+const { NodePeer } = require('./lib/stream_pipeline/push');
 const { StreamSession } = require('./service/stream-session');
 const { FfmpegCommand } = require('./service/ffmpeg');
 const fs = require('fs');
@@ -403,8 +403,10 @@ async function createExpressApp() {
             try {
                 const data = req.body;
                 const roomId = data.room;
-                const dh = new DigitalHuman({ roomId, streamSrc: data.streamSrc });
-                await dh.start();
+                const dh = new NodePeer({ roomId, streamSrc: data.streamSrc });
+                await dh.createRoom();
+                await dh.joinRoom();
+                await dh.startPush();
                 res.status(200).json(dh);
             }
             catch (error) {
@@ -421,15 +423,9 @@ async function createExpressApp() {
             let dh = null;
             try {
                 const data = req.body;
-                const roomId = data.room;
-                dh = new DigitalHuman(
-                    {
-                        roomId,
-                        deviceName: data.deviceName,
-                        displayName: data.displayName
-                    }
-                );
-                await dh.open();
+                dh = new NodePeer(data);
+                await dh.createRoom();
+                await dh.joinRoom();
                 res.status(200).json(dh);
             }
             catch (error) {
@@ -483,6 +479,7 @@ async function createExpressApp() {
                 res.status(200).json(ffmpeg);
             }
             catch (error) {
+                console.error(error)
                 next(error);
             }
         });

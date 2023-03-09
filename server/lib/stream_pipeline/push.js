@@ -13,11 +13,21 @@ const request = axios.create({
 
 global.dh = new Map();
 
-class DigitalHuman {
+async function protooConnect(protooUrl) {
+    return new Promise((resolve, reject) => {
+        const protooTransport = new protooClient.WebSocketTransport(protooUrl);
+        const client = new protooClient.Peer(protooTransport)
+        client.on('open', () => {
+            resolve(client)
+        })
+    })
+}
+
+class NodePeer {
     constructor(params) {
         this.roomId = params.roomId;
         this.streamSrc = params.streamSrc;
-        this.broadcasterId = 'node_' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+        this.peerId = 'node_' + (params.userId ?? Math.random().toString(36).slice(2)) + Math.random().toString(36).slice(2);
         this.sessionId = 'push_stream_' + uuidv4();
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
@@ -29,33 +39,29 @@ class DigitalHuman {
         };
         this.videoTransport = null;
         this.audioTransport = null;
-
         this.client = null;
-
-        this.protooUrl = `wss://chaosyhy.com:4443/?roomId=${this.roomId}&peerId=${this.broadcasterId}`
+        this.protooUrl = `wss://chaosyhy.com:4443/?roomId=${this.roomId}&peerId=${this.peerId}`
+    }
+    async createRoom() {
+        this.client = await protooConnect(this.protooUrl)
+        global.dh.set(this.sessionId, this.client);
     }
 
     /**
      * open the transport channel to ready for stream pushing
      */
-    async open() {
-        const protooTransport = new protooClient.WebSocketTransport(this.protooUrl);
-
-        this.client = new protooClient.Peer(protooTransport);
-
-        global.dh.set(this.sessionId, this.client);
-
+    async joinRoom() {
         // 验证房间是否存在
         await request.get(`/rooms/${this.roomId}`);
         // 创建数字人
         await request.post(`rooms/${this.roomId}/broadcasters`, {
-            id: this.broadcasterId,
+            id: this.peerId,
             displayName: this.displayName,
             device: { 'name': this.deviceName }
         });
 
         // 创建 mediasoup audio plainTransport
-        let res = await request.post(`rooms/${this.roomId}/broadcasters/${this.broadcasterId}/transports`, {
+        let res = await request.post(`rooms/${this.roomId}/broadcasters/${this.peerId}/transports`, {
             type: 'plain',
             comedia: true,
             rtcpMux: false
@@ -63,7 +69,7 @@ class DigitalHuman {
         this.audioTransport = res.data
 
         // 创建 mediasoup audio plainTransport
-        res = await request.post(`rooms/${this.roomId}/broadcasters/${this.broadcasterId}/transports`, {
+        res = await request.post(`rooms/${this.roomId}/broadcasters/${this.peerId}/transports`, {
             type: 'plain',
             comedia: true,
             rtcpMux: false
@@ -72,7 +78,7 @@ class DigitalHuman {
 
         const { AUDIO_PT, AUDIO_SSRC, VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
         // 创建 mediasoup audio producer
-        await request.post(`/rooms/${this.roomId}/broadcasters/${this.broadcasterId}/transports/${this.audioTransport.id}/producers`, {
+        await request.post(`/rooms/${this.roomId}/broadcasters/${this.peerId}/transports/${this.audioTransport.id}/producers`, {
             kind: 'audio',
             rtpParameters: {
                 codecs: [
@@ -93,7 +99,7 @@ class DigitalHuman {
         })
 
         // 创建 mediasoup video producer
-        await request.post(`/rooms/${this.roomId}/broadcasters/${this.broadcasterId}/transports/${this.videoTransport.id}/producers`, {
+        await request.post(`/rooms/${this.roomId}/broadcasters/${this.peerId}/transports/${this.videoTransport.id}/producers`, {
             kind: 'video',
             rtpParameters: {
                 codecs: [
@@ -109,12 +115,11 @@ class DigitalHuman {
             },
         })
 
-        global.processObj[this.sessionId] = { roomId: this.roomId, broadcasterId: this.broadcasterId };
+        global.processObj[this.sessionId] = { roomId: this.roomId, broadcasterId: this.peerId };
     }
 
 
-    async start() {
-        await this.open();
+    async startPush() {
         const { AUDIO_PT, AUDIO_SSRC, VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
         // 执行 gstreamer 命令
         const command = [
@@ -157,5 +162,5 @@ class DigitalHuman {
 
 }
 
-module.exports.DigitalHuman = DigitalHuman;
+module.exports.NodePeer = NodePeer;
 
