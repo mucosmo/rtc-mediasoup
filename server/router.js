@@ -401,10 +401,8 @@ async function createExpressApp() {
         '/stream/push',
         async (req, res, next) => {
             try {
-                const rooms = Object.keys(global.streamInfo)
                 const data = req.body;
-                let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
-                const roomId = rooms[roomIdNum - 1];
+                const roomId = data.room;
                 const dh = new DigitalHuman({ roomId, streamSrc: data.streamSrc });
                 await dh.start();
                 res.status(200).json(dh);
@@ -421,10 +419,8 @@ async function createExpressApp() {
         '/stream/push/open',
         async (req, res, next) => {
             try {
-                const rooms = Object.keys(global.streamInfo)
                 const data = req.body;
-                let roomIdNum = Number(data.room.slice(-1)) // 前段传递的伪数据
-                const roomId = rooms[roomIdNum - 1];
+                const roomId = data.room;
                 const dh = new DigitalHuman(
                     {
                         roomId,
