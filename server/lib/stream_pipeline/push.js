@@ -25,9 +25,9 @@ async function protooConnect(protooUrl) {
 
 class NodePeer {
     constructor(params) {
-        this.roomId = params.roomId;
+        this.roomId = params.roomId || Math.random().toString(36).slice(2);
         this.streamSrc = params.streamSrc;
-        this.peerId = 'node_' + (params.userId ?? Math.random().toString(36).slice(2)) + Math.random().toString(36).slice(2);
+        this.peerId = 'node_' + (params.userId || Math.random().toString(36).slice(2)) + Math.random().toString(36).slice(2);
         this.sessionId = 'push_stream_' + uuidv4();
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
