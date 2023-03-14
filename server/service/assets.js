@@ -1,7 +1,7 @@
 const { LicodeService } = require('./licode');
 
-const token = 'eyJ0b2tlbklkIjoiNjMwYzFjOTZlYTAyMjY0MDdhNGEwNDk4IiwiaG9zdCI6ImxpY29kZS5jYW5ueWNvLmNuOjQ0MyIsInNlY3VyZSI6dHJ1ZSwic2lnbmF0dXJlIjoiWmpCak5HRTFaVGxqT1dZNVlUWTJZVE0yT0dKak9UZG1NVGM0TUdSbU5UZzNabU0xWW1Ga013PT0ifQ'
-const roomName = 'msrtc'
+const token = 'eyJ0b2tlbklkIjoiNjMwYzFjOTZlYTAyMjY0MDdhNGEwNDk4IiwiaG9zdCI6ImxpY29kZS5jYW5ueWNvLmNuOjQ0MyIsInNlY3VyZSI6dHJ1ZSwic2lnbmF0dXJlIjoiWmpCak5HRTFaVGxqT1dZNVlUWTJZVE0yT0dKak9UZG1NVGM0TUdSbU5UZzNabU0xWW1Ga013PT0ifQ=='
+const roomName = 'main'
 const licodeService = new LicodeService(token, roomName);
 
 
@@ -30,13 +30,20 @@ class AssetsService {
         }
         rtcs = rtcs.filter(rtc => rtc.members.length > 0);
         this.assets['rtc'] = rtcs;
-        this.syncAssets();
+
+        console.log(rtcs)
+        setInterval(() => {
+            this.syncAssets();
+        }, 1000);
+
 
     }
 
 
     syncAssets() {
-        licodeService.sendLicodeMessage(this.assets)
+        const data = { category: this.category, assets: this.assets };
+        console.log(data)
+        licodeService.sendLicodeMessage(data)
     }
 
 }

@@ -11,7 +11,7 @@ class LicodeService {
     }
 
     open() {
-        this.room = roomManager.connect(this.token, this.roomName);
+        this.room = roomManager.connect(this.token, this.roomName, ()=>{});
         const that = this;
         if (this.room) {
             this.room.then(() => {
@@ -24,11 +24,10 @@ class LicodeService {
     }
 
     sendLicodeMessage(msg) {
-        console.log('发送消息给Licode====')
         const sessionId = 'msrtc_100001';
-        const receivers = ['default']
-        const data = this.getLicodeMessage(sessionId, this.roomName, { msg: msg}, receivers);
-        console.log(data)
+        const receivers = ['default'];
+        const roomId = '630322799a94c5505b9b2a16';
+        const data = this.getLicodeMessage(sessionId, roomId, { msg: msg}, receivers);
         try {
             roomManager.sendGenericMessage(data);
         } catch (e) {

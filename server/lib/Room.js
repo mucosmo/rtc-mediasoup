@@ -178,6 +178,8 @@ class Room extends EventEmitter {
 
 		const existingPeer = this._protooRoom.getPeer(peerId);
 
+		assetsService.updatePeers();
+
 		if (existingPeer) {
 			logger.warn(
 				'handleProtooConnection() | there is already a protoo Peer with same peerId, closing it [peerId:%s]',
@@ -239,7 +241,6 @@ class Room extends EventEmitter {
 
 			logger.info('protoo Peer "close" event [peerId:%s]', peer.id);
 
-			assetsService.updatePeers();
 
 			// If the Peer was joined, notify all Peers.
 			if (peer.data.joined) {
@@ -264,6 +265,9 @@ class Room extends EventEmitter {
 
 				this.close();
 			}
+
+			assetsService.updatePeers();
+
 		});
 	}
 
@@ -843,6 +847,8 @@ class Room extends EventEmitter {
 
 					// Mark the new Peer as joined.
 					peer.data.joined = true;
+
+					assetsService.updatePeers();
 
 					for (const joinedPeer of joinedPeers) {
 						// Create Consumers for existing Producers.

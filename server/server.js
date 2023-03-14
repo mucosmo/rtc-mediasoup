@@ -26,6 +26,9 @@ const Room = require('./lib/Room');
 const interactiveServer = require('./lib/interactiveServer');
 const interactiveClient = require('./lib/interactiveClient');
 
+const { AssetsService } = require('./service/assets');
+const assetsService = new AssetsService();
+
 const createExpressApp = require('./router')
 
 const WebSocket = require('ws');
