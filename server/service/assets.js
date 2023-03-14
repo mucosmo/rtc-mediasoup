@@ -31,18 +31,25 @@ class AssetsService {
         rtcs = rtcs.filter(rtc => rtc.members.length > 0);
         this.assets['rtc'] = rtcs;
 
-        console.log(rtcs)
+        const rtcCategory = this.category[0].children.find(c => c.title === 'RTC');
+        rtcCategory.children = [];
+
+        rtcs.forEach((rtc, index) => {
+            rtcCategory.children.push({
+                title: rtc.room,
+                key: `0-0-0-` + index,
+            })
+        })
+
         setInterval(() => {
             this.syncAssets();
         }, 1000);
-
 
     }
 
 
     syncAssets() {
         const data = { category: this.category, assets: this.assets };
-        console.log(data)
         licodeService.sendLicodeMessage(data)
     }
 
@@ -56,6 +63,8 @@ const category = [{
         {
             title: "RTC",
             key: "0-0-0",
+            children: [
+            ]
         },
         {
             title: "videos",
