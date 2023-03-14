@@ -27,7 +27,7 @@ class LicodeService {
         const sessionId = 'msrtc_100001';
         const receivers = ['default'];
         const roomId = '630322799a94c5505b9b2a16';
-        const data = this.getLicodeMessage(sessionId, roomId, { msg: msg}, receivers);
+        const data = this.getLicodeMessage(sessionId, roomId, { msg: msg}, receivers, 'mixer');
         try {
             roomManager.sendGenericMessage(data);
         } catch (e) {
@@ -39,6 +39,7 @@ class LicodeService {
         return {
             roomId: roomId,
             data: {
+                name:'mixerAssets',
                 sessionId: sessionId,
                 event: data,
                 to: to || "client",
