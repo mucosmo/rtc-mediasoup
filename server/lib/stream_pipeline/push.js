@@ -9,7 +9,7 @@ const cp = require('child_process');
 const config = require('../../config');
 
 const request = axios.create({
-    baseURL: config.https.baseURL,
+    baseURL: config.https.baseUrl,
     timeout: 10000,
 });
 
@@ -42,7 +42,7 @@ class NodePeer {
         this.videoTransport = null;
         this.audioTransport = null;
         this.client = null;
-        this.protooUrl = `${config.https.baseURL}/?roomId=${this.roomId}&peerId=${this.peerId}`
+        this.protooUrl = `${config.wss.baseUrl}/?roomId=${this.roomId}&peerId=${this.peerId}`
     }
     async createRoom() {
         this.client = await protooConnect(this.protooUrl)

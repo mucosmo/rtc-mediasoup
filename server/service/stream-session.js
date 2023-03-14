@@ -3,7 +3,7 @@ const axios = require('axios');
 const config = require('../config')
 
 const request = axios.create({
-    baseURL: config.https.baseURL,
+    baseURL: config.https.baseUrl,
     timeout: 10000,
 });
 
