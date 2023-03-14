@@ -41,10 +41,7 @@ class AssetsService {
             })
         })
 
-        setInterval(() => {
-            this.syncAssets();
-        }, 1000);
-
+        this.syncAssets();
     }
 
 
