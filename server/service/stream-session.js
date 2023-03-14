@@ -1,7 +1,9 @@
 const axios = require('axios');
 
+const config = require('../config')
+
 const request = axios.create({
-    baseURL: 'https://chaosyhy.com:4443/',
+    baseURL: config.https.baseURL,
     timeout: 10000,
 });
 

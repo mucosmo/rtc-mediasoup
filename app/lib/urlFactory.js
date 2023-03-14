@@ -1,4 +1,6 @@
-let protooPort = 4443;
+const config = require('../../server/config');
+
+const protooPort = config.https.listenPort;
 
 if (window.location.hostname === 'test.mediasoup.org')
 	protooPort = 4444;
