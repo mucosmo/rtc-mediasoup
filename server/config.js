@@ -9,7 +9,10 @@
  */
 
 const os = require('os');
-const parsedEnv = require('dotenv').config().parsed;
+
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 module.exports =
 {
@@ -20,17 +23,17 @@ module.exports =
 	{
 		listenIp: '0.0.0.0',
 		// NOTE: Don't change listenPort (client app assumes 4443).
-		listenPort: +parsedEnv.PROTOO_LISTEN_PORT || 4443,
+		listenPort: +process.env.PROTOO_LISTEN_PORT || 4443,
 		// NOTE: Set your own valid certificate files.
 		tls:
 		{
 			cert: `/etc/nginx/certs/chaosyhy.com_nginx/chaosyhy.com.pem`, // 证书
 			key: `/etc/nginx/certs/chaosyhy.com_nginx/chaosyhy.com.key`
 		},
-		baseUrl: `https://chaosyhy.com:${parsedEnv.PROTOO_LISTEN_PORT}`
+		baseUrl: `https://chaosyhy.com:${process.env.PROTOO_LISTEN_PORT}`
 	},
 	wss: {
-		baseUrl: `wss://chaosyhy.com:${parsedEnv.PROTOO_LISTEN_PORT}`
+		baseUrl: `wss://chaosyhy.com:${process.env.PROTOO_LISTEN_PORT}`
 	},
 	// mediasoup settings.
 	mediasoup:
@@ -129,14 +132,14 @@ module.exports =
 					{
 						protocol: 'udp',
 						ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-						announcedIp: parsedEnv.MEDIASOUP_ANNOUNCED_IP,
-						port: +parsedEnv.WEBRTC_UDP_PORT // 这里必须用 udp 端口，不能是 tcp 端口
+						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
+						port: +process.env.WEBRTC_UDP_PORT // 这里必须用 udp 端口，不能是 tcp 端口
 					},
 					{
 						protocol: 'tcp',
 						ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-						announcedIp: parsedEnv.MEDIASOUP_ANNOUNCED_IP,
-						port: +parsedEnv.WEBRTC_TCP_PORT
+						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
+						port: +process.env.WEBRTC_TCP_PORT
 					}
 				],
 		},
@@ -151,7 +154,7 @@ module.exports =
 				[
 					{
 						ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-						announcedIp: parsedEnv.MEDIASOUP_ANNOUNCED_IP
+						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP
 					}
 				],
 			initialAvailableOutgoingBitrate: 1000000,
@@ -168,7 +171,7 @@ module.exports =
 			listenIp:
 			{
 				ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-				announcedIp: parsedEnv.MEDIASOUP_ANNOUNCED_IP
+				announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP
 			},
 			rtcpMux: true, // for recorder
 			comedia: false,
