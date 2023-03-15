@@ -3,15 +3,16 @@ const EventEmitter = require('events').EventEmitter;
 
 
 class LicodeService {
-    constructor(token, roomName) {
-        this.token = token;
-        this.roomName = roomName;
+    constructor(token, roomName, roomId) {
+        this.token = token || 'eyJ0b2tlbklkIjoiNjQxMThkZDc1ODAyOTU1NDNiNmU4MTdjIiwiaG9zdCI6ImxpY29kZS5jYW5ueWNvLmNuOjgwODAiLCJzZWN1cmUiOnRydWUsInNpZ25hdHVyZSI6Ill6UTROMkppTURCaE1XVTNPVFZqWlRreE1XTmhNR0kzT0RNNE5EZGhPRGN4TmpnNE5EZ3pPUT09In0=';
+        this.roomName = roomName || 'main';
+        this.roomId = roomId || '6411633add626355f6e174a8';
         this.eventEmitter = new EventEmitter();
         this.open();
     }
 
     open() {
-        this.room = roomManager.connect(this.token, this.roomName, ()=>{});
+        this.room = roomManager.connect(this.token, this.roomName, () => { });
         const that = this;
         if (this.room) {
             this.room.then(() => {
@@ -26,8 +27,7 @@ class LicodeService {
     sendLicodeMessage(msg) {
         const sessionId = 'msrtc_100001';
         const receivers = ['default'];
-        const roomId = '630322799a94c5505b9b2a16';
-        const data = this.getLicodeMessage(sessionId, roomId, { msg: msg}, receivers, 'mixer');
+        const data = this.getLicodeMessage(sessionId, this.roomId, { msg: msg }, receivers, 'mixer');
         try {
             roomManager.sendGenericMessage(data);
         } catch (e) {
@@ -39,7 +39,7 @@ class LicodeService {
         return {
             roomId: roomId,
             data: {
-                name:'mixerAssets',
+                name: 'mixerAssets',
                 sessionId: sessionId,
                 event: data,
                 to: to || "client",

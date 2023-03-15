@@ -1,9 +1,5 @@
 const { LicodeService } = require('./licode');
-
-const token = 'eyJ0b2tlbklkIjoiNjMwYzFjOTZlYTAyMjY0MDdhNGEwNDk4IiwiaG9zdCI6ImxpY29kZS5jYW5ueWNvLmNuOjQ0MyIsInNlY3VyZSI6dHJ1ZSwic2lnbmF0dXJlIjoiWmpCak5HRTFaVGxqT1dZNVlUWTJZVE0yT0dKak9UZG1NVGM0TUdSbU5UZzNabU0xWW1Ga013PT0ifQ=='
-const roomName = 'main'
-const licodeService = new LicodeService(token, roomName);
-
+const licodeService = new LicodeService();
 
 class AssetsService {
     constructor() {
@@ -35,7 +31,7 @@ class AssetsService {
         rtcCategory.children = [];
 
         rtcs.forEach((rtc, index) => {
-            if(rtc.room.startsWith('mixer')) return;
+            if (rtc.room.startsWith('mixer')) return;
             rtcCategory.children.push({
                 title: rtc.room,
                 key: `0-0-0-` + index,
