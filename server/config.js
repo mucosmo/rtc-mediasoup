@@ -132,13 +132,13 @@ module.exports =
 					{
 						protocol: 'udp',
 						ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
+						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || '121.5.133.154',
 						port: +process.env.WEBRTC_UDP_PORT // 这里必须用 udp 端口，不能是 tcp 端口
 					},
 					{
 						protocol: 'tcp',
 						ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP,
+						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || '121.5.133.154',
 						port: +process.env.WEBRTC_TCP_PORT
 					}
 				],
@@ -154,7 +154,7 @@ module.exports =
 				[
 					{
 						ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP
+						announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || '121.5.133.154'
 					}
 				],
 			initialAvailableOutgoingBitrate: 1000000,
@@ -171,7 +171,7 @@ module.exports =
 			listenIp:
 			{
 				ip: process.env.MEDIASOUP_LISTEN_IP || '0.0.0.0',
-				announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP
+				announcedIp: process.env.MEDIASOUP_ANNOUNCED_IP || '121.5.133.154'
 			},
 			rtcpMux: true, // for recorder
 			comedia: false,
