@@ -35,6 +35,7 @@ class AssetsService {
         rtcCategory.children = [];
 
         rtcs.forEach((rtc, index) => {
+            if(rtc.room.startsWith('mixer')) return;
             rtcCategory.children.push({
                 title: rtc.room,
                 key: `0-0-0-` + index,
