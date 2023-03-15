@@ -16,6 +16,8 @@ const { StreamSession } = require('./service/stream-session');
 const { FfmpegCommand } = require('./service/ffmpeg');
 const fs = require('fs');
 
+const { RtcSDK } = require('./service/rtc/rtcSDK');
+
 async function createExpressApp() {
     logger.info('creating Express app...');
 
@@ -400,7 +402,7 @@ async function createExpressApp() {
     expressApp.post(
         '/stream/push',
         async (req, res, next) => {
-            let nodepeer= null;
+            let nodepeer = null;
             try {
                 const data = req.body;
                 const nodepeer = new NodePeer(data);
@@ -484,6 +486,38 @@ async function createExpressApp() {
                 next(error);
             }
         });
+
+
+    expressApp.post(
+        '/rtc/room/create',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const rtc = new RtcSDK(data);
+                await rtc.createRoom();
+                await rtc.joinRoom();
+                res.status(200).json(rtc);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
+        expressApp.post(
+            '/rtc/room/leave',
+            async (req, res, next) => {
+                try {
+                    const data = req.body;
+                    const rtc = new RtcSDK(data);
+                    await rtc.leaveRoom();
+                    res.status(200).json(rtc);
+                }
+                catch (error) {
+                    console.error(error)
+                    next(error);
+                }
+            });
 
 
     /**
