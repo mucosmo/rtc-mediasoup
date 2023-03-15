@@ -31,7 +31,7 @@ class LicodeService {
         try {
             roomManager.sendGenericMessage(data);
         } catch (e) {
-            logger.error("sendLicodeMessage", e);
+            console.error("failed to send locode message:", e);
         }
     }
 
