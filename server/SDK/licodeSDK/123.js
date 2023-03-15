@@ -56,7 +56,7 @@ class RoomSocket {
 
   // 发送消息
   sendGenericMessage = (data) => {
-    console.warn("sendNewMessage :>> ", data);
+    // console.warn("sendNewMessage :>> ", data);
     if (this.room) {
       this.room.sendGenericMessage(data);
     } else console.log("未找到");
