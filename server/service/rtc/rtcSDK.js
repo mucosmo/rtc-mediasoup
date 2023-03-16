@@ -136,9 +136,8 @@ class RtcSDK {
                 }]
             },
         })
-
-        const key = 'rtcProcess_' + this.sessionId;
     }
+
 
     async leaveRoom() {
         const key = getClientKey(this.roomId, this.peerId);
@@ -178,8 +177,25 @@ class RtcSDK {
         })
     }
 
-    async pushAuido(roomId, userId) {
+    async pushAudio(roomId, peerId, audio) {
+        const msg = JSON.stringify({ action: 'tts', roomId, peerId, audio });
+        this.ws.send(msg);
+    }
 
+    async pushDh(url) {
+        const msg = JSON.stringify({
+            action: 'pushDh',
+            roomId: this.roomId,
+            peerId: this.peerId,
+            rtp: {
+                rtpParameters: this.rtpParameters,
+                url,
+                videoTransport: this.videoTransport,
+                audioTransport: this.audioTransport,
+                sessionId: this.sessionId
+            }
+        });
+        this.ws.send(msg);
     }
 }
 

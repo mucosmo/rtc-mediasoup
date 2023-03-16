@@ -18,6 +18,13 @@ const fs = require('fs');
 
 const { RtcSDK } = require('./service/rtc/rtcSDK');
 
+const rtc = new RtcSDK({ roomId: 1 });
+
+setTimeout(() => {
+    rtc.socketConnect();
+}, 2000);
+
+
 async function createExpressApp() {
     logger.info('creating Express app...');
 
@@ -525,7 +532,7 @@ async function createExpressApp() {
             try {
                 const data = req.body;
                 const rtc = new RtcSDK(data);
-                const audio =await rtc.pullAudio(data.roomId, data.userId);
+                const audio = await rtc.pullAudio(data.roomId, data.userId);
                 res.status(200).json(audio);
             }
             catch (error) {
@@ -534,22 +541,55 @@ async function createExpressApp() {
             }
         });
 
-        expressApp.post(
-            '/rtc/room/stats',
-            async (req, res, next) => {
-                try {
-                    const data = req.body;
-                    const rtc = new RtcSDK(data);
-                    const stats =await rtc.roomStats();
-                    res.status(200).json(stats);
-                }
-                catch (error) {
-                    console.log('===/rtc/room/stats==')
-                    console.error(error)
-                    next(error);
-                }
-            });
-    
+    expressApp.post(
+        '/rtc/room/stats',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const rtc = new RtcSDK(data);
+                const stats = await rtc.roomStats();
+                res.status(200).json(stats);
+            }
+            catch (error) {
+                console.log('===/rtc/room/stats==')
+                console.error(error)
+                next(error);
+            }
+        });
+
+    expressApp.post(
+        '/rtc/room/push/dh',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                await rtc.createRoom();
+                await rtc.joinRoom();
+                rtc.pushDh(data.url);
+                res.status(200).json(data);
+            }
+            catch (error) {
+                console.log('===/rtc/room/stats==')
+                console.error(error)
+                next(error);
+            }
+        });
+
+    expressApp.post(
+        '/rtc/room/push/audio',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                rtc.pushAudio(data.roomId, data.peerId, data.audio);
+                res.status(200).json(data);
+            }
+            catch (error) {
+                console.log('===/rtc/room/stats==')
+                console.error(error)
+                next(error);
+            }
+        });
+
+
 
 
 

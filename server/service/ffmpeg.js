@@ -6,7 +6,7 @@ const { StreamSession } = require('./stream-session');
 
 
 class FfmpegCommand {
-    constructor(command,channelSessionId) {
+    constructor(command, channelSessionId) {
         this.command = command;
         this.channelSessionId = channelSessionId;
         this.sessionId = 'push_stream_' + uuidv4();
@@ -23,9 +23,9 @@ class FfmpegCommand {
             console.error('ffmpeg::process::error [pid:%d, message:%o]', cp.pid, err)
         )
 
-        // cp.stderr.on('data', data =>
-        //     console.log('err:' + data)
-        // )
+        cp.stderr.on('data', data =>
+            console.log('err:' + data)
+        )
 
         cp.stdout.on('data', data =>
             console.log('data:' + data)
@@ -38,11 +38,21 @@ class FfmpegCommand {
 
     }
 
+    static fileToUdp(file, roomId, peerId) {
+        const command = `ffmpeg -re -i /opt/dev/rtcSdk/files/16k-1.mp3 -f mpegts udp://0.0.0.0:1234`;
+        console.log('-----udp command:', command)
+        const cp = exec(command);
+        // cp.stderr.on('data', data =>
+        //     console.log('==udp --err:' + data)
+        // )
+
+    }
+
     async closeSession() {
         const sessionId = this.channelSessionId;
         global.dh.get(sessionId)?.close();
         global.dh.delete(sessionId);
-        const streamSession = new StreamSession({ sessionId});
+        const streamSession = new StreamSession({ sessionId });
         await streamSession.close();
     }
 }

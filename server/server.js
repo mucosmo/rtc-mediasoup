@@ -44,7 +44,10 @@ const rooms = new Map();
 
 global.rooms = rooms;
 
-const GStreamer = require('./service/gst/extractAudio')
+const GStreamer = require('./service/gst/extractAudio');
+
+const { FfmpegCommand } = require('./service/ffmpeg');
+
 
 // HTTPS server.
 // @type {https.Server}
@@ -196,6 +199,10 @@ async function runAsrSocketServer() {
 			if (msg.action == 'asrReady') {
 				const { roomId, peerId } = msg;
 				pullAudio(roomId, peerId, ws);
+			} else if (msg.action == 'tts') {
+				pushAudio(msg);
+			}else if(msg.action == 'pushDh'){
+				pushDh(msg);
 			}
 		});
 	});
@@ -220,21 +227,50 @@ function pullAudio(roomId, peerId, ws) {
 	}
 }
 
-/**
- * client is ready to accept buufer
- */
-async function readyToSendBuffer(ws) {
-	console.log("开始发送测试音频>>>>>>>>>:");
-	//测试音频文件
-	const bytesPerFrame = (16000 * 2 / 1000) * 160;//16000的采样率，16bits=2bytes， 1000ms，  一个数据帧 160ms
-	const filePath = '../files/recorder/asrbot.pcm'
-	const fileStream = fs.createReadStream(filePath);
-	fileStream.on('readable', () => {
-		while (null !== (buffer = fileStream.read(bytesPerFrame))) {
-			ws.send(buffer);
-		}
-	})
+
+// 推送（添加音频）
+function pushAudio(msg) {
+	const { roomId, peerId, audio } = msg;
+	const path = base64ToWav(roomId, peerId, audio);
+	FfmpegCommand.fileToUdp(path, roomId, peerId);
 }
+
+function base64ToWav(roomId, peerId, audio) {
+	const buffer = Buffer.from(audio, 'base64');
+	const path = `../files/tts/ttx_${roomId}_${peerId}.wav`;
+	fs.writeFileSync(path, buffer);
+	return path;
+}
+
+
+// 推送数字人
+function pushDh(msg) {
+	const { roomId, peerId, rtp } = msg;
+	const command = getFfmpegCommand(rtp);
+	const ffmpeg = new FfmpegCommand(command, rtp.sessionId);
+	ffmpeg.rtpRoom();
+}
+
+function getFfmpegCommand(rtp){
+
+	const input = `ffmpeg -re -stream_loop 5 -i ${rtp.url} -re -i udp://0.0.0.0:1234`;
+	const videoSink = [
+		`-map "0:v" -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 `,
+		`-ssrc ${rtp.rtpParameters.VIDEO_SSRC} -payload_type ${rtp.rtpParameters.VIDEO_PT}`,
+		`-f rtp rtp://${rtp.videoTransport.ip}:${rtp.videoTransport.port}`
+	  ].join(' ');
+  
+	  const audioSink = [
+		`-map "1:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
+		`-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`
+	  ].join(' ');
+
+ 
+	  const command = `${input}  ${videoSink}  ${audioSink}`;
+	  console.log('=======command:', command)
+	  return command;
+}
+ 
 
 /**
  * Create a protoo WebSocketServer to allow WebSocket connections from browsers.
