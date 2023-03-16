@@ -10,9 +10,7 @@
 
 const os = require('os');
 
-const dotenv = require('dotenv');
-
-dotenv.config();
+require('dotenv').config();
 
 module.exports =
 {
