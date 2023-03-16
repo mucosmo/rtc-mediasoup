@@ -187,7 +187,7 @@ async function runHttpsServer() {
  */
 async function runAsrSocketServer() {
 	logger.info('running an AsrSocket server...');
-	const wss = new WebSocket.Server({ port: 60153 });
+	const wss = new WebSocket.Server({ port: process.env.RTC_AUDIO_WSS_PORT });
 	wss.on('connection', function (ws) {
 		console.log('======client connected');
 		ws.on('message', function (data, isBinary) {
