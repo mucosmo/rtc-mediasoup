@@ -168,14 +168,10 @@ class RtcSDK {
             ws.on('open', function open() {
                 resolve(ws);
             });
-
             const that = this;
-
             ws.on('message', function incoming(data) {
-                console.log(data);
                 that.eventEmitter.emit('newAudioData', data)
             });
-
             ws.on('close', function close() {
                 console.log('WebSocket client disconnected');
             });
