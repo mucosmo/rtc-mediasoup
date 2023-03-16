@@ -504,20 +504,53 @@ async function createExpressApp() {
             }
         });
 
+    expressApp.post(
+        '/rtc/room/leave',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const rtc = new RtcSDK(data);
+                await rtc.leaveRoom();
+                res.status(200).json(rtc);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
+    expressApp.post(
+        '/rtc/stream/pull',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const rtc = new RtcSDK(data);
+                const audio =await rtc.pullAudio(data.roomId, data.userId);
+                res.status(200).json(audio);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
         expressApp.post(
-            '/rtc/room/leave',
+            '/rtc/room/stats',
             async (req, res, next) => {
                 try {
                     const data = req.body;
                     const rtc = new RtcSDK(data);
-                    await rtc.leaveRoom();
-                    res.status(200).json(rtc);
+                    const stats =await rtc.roomStats();
+                    res.status(200).json(stats);
                 }
                 catch (error) {
+                    console.log('===/rtc/room/stats==')
                     console.error(error)
                     next(error);
                 }
             });
+    
+
 
 
     /**

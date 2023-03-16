@@ -44,6 +44,8 @@ const rooms = new Map();
 
 global.rooms = rooms;
 
+const GStreamer = require('./service/gst/extractAudio')
+
 // HTTPS server.
 // @type {https.Server}
 let httpsServer;
@@ -87,8 +89,8 @@ async function run() {
 	// Run HTTPS server.
 	await runHttpsServer();
 
-	// // Run websocket server for ASR.
-	// await runAsrSocketServer();
+	// Run websocket server for ASR.
+	await runAsrSocketServer();
 
 	// Run a protoo WebSocketServer.
 	await runProtooWebSocketServer();
@@ -185,17 +187,37 @@ async function runHttpsServer() {
  */
 async function runAsrSocketServer() {
 	logger.info('running an AsrSocket server...');
-	const wss = new WebSocket.Server({ port: 60115 });
-
+	const wss = new WebSocket.Server({ port: 60153 });
 	wss.on('connection', function (ws) {
-		console.log('client connected');
+		console.log('======client connected');
 		ws.on('message', function (data, isBinary) {
-			const message = isBinary ? data : data.toString()
-			if (message === 'asrReady') {
-				readyToSendBuffer(ws)
+			const message = isBinary ? data : data.toString();
+			const msg = JSON.parse(message);
+			if (msg.action == 'asrReady') {
+				const { roomId, peerId } = msg;
+				pullAudio(roomId, peerId, ws);
 			}
 		});
 	});
+}
+
+
+function pullAudio(roomId, peerId, ws) {
+	try {
+		const audioRtpParams = global.streamInfo[roomId][peerId]['audio'];
+		const consumers = global.streamInfo[roomId][peerId]['consumers'];
+
+		new GStreamer({ audio: audioRtpParams }, ws);
+
+		setTimeout(async () => {
+			for (const [id, consumer] of consumers) {
+				await consumer.resume();
+				await consumer.requestKeyFrame();
+			}
+		}, 1000);
+	} catch (err) {
+		console.error(err)
+	}
 }
 
 /**
@@ -244,13 +266,13 @@ async function runProtooWebSocketServer() {
 
 		// Stream.addPeer(roomId,peerId)
 
- 
+
 
 		logger.info(
 			'protoo connection request [roomId:%s, peerId:%s, address:%s, origin:%s]',
 			roomId, peerId, info.socket.remoteAddress, info.origin);
 
-			global.peerRoom.set(peerId, roomId);
+		global.peerRoom.set(peerId, roomId);
 
 
 		// Serialize this code into the queue to avoid that two peers connecting at

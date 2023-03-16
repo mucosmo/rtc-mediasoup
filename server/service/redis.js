@@ -1,9 +1,5 @@
 const redis = require('redis');
 
-
-console.log(process.env.REDIS_PASSWORD)
-
-
 class RedisService {
     constructor() {
         // 创建客户端
@@ -16,11 +12,11 @@ class RedisService {
     };
 
     /**
- * redis set
- * @param {string} key 键
- * @param {string} val 值
- * @param {number} timeout 过期时间，单位 s
- */
+     * redis set
+     * @param {string} key 键
+     * @param {string} val 值
+     * @param {number} timeout 过期时间，单位 s
+     */
     async set(key, val, timeout = 60 * 60) {
         if (typeof val === 'object') {
             val = JSON.stringify(val)

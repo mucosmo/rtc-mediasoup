@@ -1,5 +1,4 @@
 const protooClient = require('protoo-client');
-const redisService = require("../redis.js").RedisService;
 const { v4: uuidv4 } = require('uuid');
 
 const rtcConfig = require('./rtcConfig.js');
@@ -12,9 +11,12 @@ const request = axios.create({
 
 global.client = new Map();
 
-function getClientKey(roomId, peerId) {
-    return 'rtcClient_' + roomId + peerId;
-}
+const { SocketClient } = require('./socketClient.js');
+const ws = new SocketClient(rtcConfig.RTC_AUDIO_WSS_BASEURL);
+setTimeout(() => {
+    ws.connect();
+}, 2000);
+
 
 async function protooConnect(protooUrl) {
     return new Promise((resolve, reject) => {
@@ -38,6 +40,10 @@ async function protooConnect(protooUrl) {
 
         })
     })
+}
+
+function getClientKey(roomId, peerId) {
+    return 'rtcClient_' + roomId + peerId;
 }
 
 class RtcSDK {
@@ -64,17 +70,13 @@ class RtcSDK {
         const protooUrl = `${wssBaseUrl}/?roomId=${this.roomId}&peerId=${this.peerId}`;
         this.client = await protooConnect(protooUrl);
         const key = getClientKey(this.roomId, this.peerId);
-        redisService.set(key, this.client, 24 * 60 * 60);
         global.client.set(key, this.client);
     }
 
-    /**
-     * open the transport channel to ready for stream pushing
-     */
+
     async joinRoom() {
         // 验证房间是否存在
         await request.get(`/rooms/${this.roomId}`);
-        // 创建数字人
         await request.post(`rooms/${this.roomId}/broadcasters`, {
             id: this.peerId,
             displayName: this.displayName,
@@ -104,12 +106,12 @@ class RtcSDK {
             rtpParameters: {
                 codecs: [
                     {
-                        mimeType: "audio/opus",
+                        mimeType: 'audio/opus',
                         payloadType: AUDIO_PT,
                         clockRate: 48000,
                         channels: 2,
                         parameters: {
-                            "sprop-stereo": 1
+                            'sprop-stereo': 1
                         }
                     }
                 ],
@@ -125,7 +127,7 @@ class RtcSDK {
             rtpParameters: {
                 codecs: [
                     {
-                        mimeType: "video/vp8",
+                        mimeType: 'video/vp8',
                         payloadType: VIDEO_PT,
                         clockRate: 90000
                     }
@@ -137,29 +139,31 @@ class RtcSDK {
         })
 
         const key = 'rtcProcess_' + this.sessionId;
-        redisService.set(key, JSON.stringify({ roomId: this.roomId, broadcasterId: this.peerId }));
     }
 
     async leaveRoom() {
         const key = getClientKey(this.roomId, this.peerId);
-        // const client = new protooClient.Peer(JSON.parse(await redisService.get(key)));
         const client = global.client.get(key);
         client.close();
     }
 
-    async pullAudio(roomId, userId) {
+    async roomStats() {
+        const url = `${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rooms/stats`;
+        const ret = await request.post(url);
+        return ret.data;
+    }
 
+    async pullAudio(roomId, peerId) {
+        const msg = JSON.stringify({ action: 'asrReady', roomId, peerId });
+        ws.send(msg);
     }
 
     async pushAuido(roomId, userId) {
 
     }
-
-    async pushVideo() {
-
-    }
-
-
 }
+
+
+
 
 module.exports.RtcSDK = RtcSDK;
