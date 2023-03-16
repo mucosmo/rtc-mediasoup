@@ -1,5 +1,6 @@
 const protooClient = require('protoo-client');
 const { v4: uuidv4 } = require('uuid');
+const WebSocket = require('ws');
 
 const rtcConfig = require('./rtcConfig.js');
 
@@ -11,12 +12,7 @@ const request = axios.create({
 
 global.client = new Map();
 
-const { SocketClient } = require('./socketClient.js');
-const ws = new SocketClient(rtcConfig.RTC_AUDIO_WSS_BASEURL);
-setTimeout(() => {
-    ws.connect();
-}, 2000);
-
+const EventEmitter = require('events').EventEmitter;
 
 async function protooConnect(protooUrl) {
     return new Promise((resolve, reject) => {
@@ -62,6 +58,9 @@ class RtcSDK {
         this.videoTransport = null;
         this.audioTransport = null;
         this.client = null;
+        this.eventEmitter = new EventEmitter();
+        this.ws = null;
+        this.audioSocketUrl = params.audioSocketUrl || rtcConfig.RTC_AUDIO_WSS_BASEURL;
     }
 
 
@@ -155,15 +154,37 @@ class RtcSDK {
 
     async pullAudio(roomId, peerId) {
         const msg = JSON.stringify({ action: 'asrReady', roomId, peerId });
-        ws.send(msg);
+        this.ws.send(msg);
+    }
+
+    on(eventName, callback) {
+        this.eventEmitter.on(eventName, callback)
+    }
+
+    async socketConnect() {
+        return new Promise((resolve, reject) => {
+            const ws = new WebSocket(this.audioSocketUrl);
+            this.ws = ws;
+            ws.on('open', function open() {
+                resolve(ws);
+            });
+
+            const that = this;
+
+            ws.on('message', function incoming(data) {
+                console.log(data);
+                that.eventEmitter.emit('newAudioData', data)
+            });
+
+            ws.on('close', function close() {
+                console.log('WebSocket client disconnected');
+            });
+        })
     }
 
     async pushAuido(roomId, userId) {
 
     }
 }
-
-
-
 
 module.exports.RtcSDK = RtcSDK;
