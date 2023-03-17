@@ -90,7 +90,7 @@ class RtcSDK {
         })
         this.audioTransport = res.data
 
-        // 创建 mediasoup audio plainTransport
+        // 创建 mediasoup video plainTransport
         res = await request.post(`rooms/${this.roomId}/broadcasters/${this.peerId}/transports`, {
             type: 'plain',
             comedia: true,
