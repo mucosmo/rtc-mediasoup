@@ -136,6 +136,12 @@ class RtcSDK {
                 }]
             },
         })
+
+        return {
+            rtpParameters: this.rtpParameters,
+            audioTransport: this.audioTransport,
+            videoTransport: this.videoTransport
+        }
     }
 
 

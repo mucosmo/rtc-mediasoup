@@ -563,9 +563,9 @@ async function createExpressApp() {
             try {
                 const data = req.body;
                 await rtc.createRoom();
-                await rtc.joinRoom();
+                const rtp = await rtc.joinRoom();
                 rtc.pushDh(data.url);
-                res.status(200).json(data);
+                res.status(200).json(rtp);
             }
             catch (error) {
                 console.log('===/rtc/room/stats==')

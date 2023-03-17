@@ -201,7 +201,7 @@ async function runAsrSocketServer() {
 				pullAudio(roomId, peerId, ws);
 			} else if (msg.action == 'tts') {
 				pushAudio(msg);
-			}else if(msg.action == 'pushDh'){
+			} else if (msg.action == 'pushDh') {
 				pushDh(msg);
 			}
 		});
@@ -246,9 +246,12 @@ function base64ToWav(roomId, peerId, audio) {
 // 推送数字人
 function pushDh(msg) {
 	const { roomId, peerId, rtp } = msg;
-	const command = getFfmpegCommand(rtp);
-	const ffmpeg = new FfmpegCommand(command, rtp.sessionId);
-	ffmpeg.rtpRoom();
+	const video = getVideoCommand(rtp);
+	FfmpegCommand.execCommand(video);
+
+	const audio = getAudioCommand(rtp);
+	FfmpegCommand.execCommand(audio);
+
 }
 
 function getFfmpegCommand(rtp){
@@ -258,19 +261,40 @@ function getFfmpegCommand(rtp){
 		`-map "0:v" -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 `,
 		`-ssrc ${rtp.rtpParameters.VIDEO_SSRC} -payload_type ${rtp.rtpParameters.VIDEO_PT}`,
 		`-f rtp rtp://${rtp.videoTransport.ip}:${rtp.videoTransport.port}`
-	  ].join(' ');
-  
-	  const audioSink = [
+	].join(' ');
+
+	const audioSink = [
 		`-map "1:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
 		`-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`
-	  ].join(' ');
+	].join(' ');
 
- 
-	  const command = `${input}  ${videoSink}  ${audioSink}`;
-	  console.log('=======command:', command)
-	  return command;
+
+	const command = `${input}  ${videoSink}  ${audioSink}`;
+	console.log('=======command:', command)
+	return command;
 }
- 
+
+function getVideoCommand(rtp) {
+	const input = `ffmpeg -re -stream_loop 10 -i ${rtp.url}`;
+	const videoSink = [
+		`-map "0:v" -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 2 `,
+		`-ssrc ${rtp.rtpParameters.VIDEO_SSRC} -payload_type ${rtp.rtpParameters.VIDEO_PT}`,
+		`-f rtp rtp://${rtp.videoTransport.ip}:${rtp.videoTransport.port}`
+	].join(' ');
+	const command = `${input}  ${videoSink}`;
+	return command;
+}
+
+function getAudioCommand(rtp) {
+	const input = `ffmpeg -re -i udp://0.0.0.0:1234`;
+	const audioSink = [
+		`-map "0:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
+		`-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`
+	].join(' ');
+	const command = `${input}  ${audioSink}`;
+	return command;
+}
+
 
 /**
  * Create a protoo WebSocketServer to allow WebSocket connections from browsers.

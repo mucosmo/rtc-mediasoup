@@ -39,13 +39,15 @@ class FfmpegCommand {
     }
 
     static fileToUdp(file, roomId, peerId) {
-        const command = `ffmpeg -re -i /opt/dev/rtcSdk/files/16k-1.mp3 -f mpegts udp://0.0.0.0:1234`;
-        console.log('-----udp command:', command)
+        const command = `ffmpeg -re -i /opt/dev/rtcSdk/files/tts/ttx_${roomId}_${peerId}.wav -f mpegts udp://0.0.0.0:1234`;
         const cp = exec(command);
-        // cp.stderr.on('data', data =>
-        //     console.log('==udp --err:' + data)
-        // )
+        cp.stderr.on('data', data =>
+            console.log('==udp --err:' + data)
+        )
+    }
 
+    static execCommand(command) {
+        exec(command);
     }
 
     async closeSession() {
