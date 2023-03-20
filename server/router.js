@@ -18,7 +18,7 @@ const fs = require('fs');
 
 const { RtcSDK } = require('./service/rtc/rtcSDK');
 
-const rtc = new RtcSDK({ roomId: 1 });
+const rtc = new RtcSDK({});
 
 setTimeout(() => {
     rtc.socketConnect();
@@ -562,7 +562,7 @@ async function createExpressApp() {
         async (req, res, next) => {
             try {
                 const data = req.body;
-                await rtc.createRoom();
+                await rtc.createRoom(data);
                 const rtp = await rtc.joinRoom();
                 rtc.pushDh(data.url);
                 res.status(200).json(rtp);

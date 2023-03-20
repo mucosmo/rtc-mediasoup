@@ -44,11 +44,6 @@ function getClientKey(roomId, peerId) {
 
 class RtcSDK {
     constructor(params) {
-        this.roomId = params.roomId || Math.random().toString(36).slice(2);
-        this.peerId = 'node_' + (params.userId || Math.random().toString(36).slice(2));
-        this.sessionId = 'push_stream_' + uuidv4();
-        this.displayName = params.displayName || 'DH-TX';
-        this.deviceName = params.deviceName || 'GStreamer';
         this.rtpParameters = {
             AUDIO_SSRC: params.AUDIO_SSRC || 1111,
             AUDIO_PT: params.AUDIO_PT || 100,
@@ -64,7 +59,12 @@ class RtcSDK {
     }
 
 
-    async createRoom() {
+    async createRoom(params) {
+        this.roomId = params.roomId || Math.random().toString(36).slice(2);
+        this.peerId = 'node_' + (params.userId || Math.random().toString(36).slice(2));
+        this.displayName = params.displayName || 'DH-TX';
+        this.deviceName = params.deviceName || 'GStreamer';
+        this.sessionId = 'push_stream_' + uuidv4();
         const wssBaseUrl = rtcConfig.RTC_SERVER_WSS_BASEURL;
         const protooUrl = `${wssBaseUrl}/?roomId=${this.roomId}&peerId=${this.peerId}`;
         this.client = await protooConnect(protooUrl);
