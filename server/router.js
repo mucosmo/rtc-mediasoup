@@ -30,7 +30,8 @@ async function createExpressApp() {
 
     const expressApp = express();
 
-    expressApp.use(bodyParser.json());
+    expressApp.use(express.json({ limit: '5mb' }));
+    expressApp.use(express.urlencoded({ limit: '5mb' }));
 
     /**
      * For every API request, verify that the roomId in the path matches and

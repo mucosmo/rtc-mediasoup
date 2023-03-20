@@ -286,7 +286,8 @@ function getVideoCommand(rtp) {
 }
 
 function getAudioCommand(rtp) {
-	const input = `ffmpeg -re -i udp://0.0.0.0:1234`;
+	// http://downsc.chinaz.net/Files/DownLoad/sound1/201906/11582.mp3
+	const input = `ffmpeg -re -i https://chaosyhy.com:60125/files/16k-1.mp3`;
 	const audioSink = [
 		`-map "0:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
 		`-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`
