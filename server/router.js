@@ -437,16 +437,16 @@ async function createExpressApp() {
     expressApp.post(
         '/stream/push/open',
         async (req, res, next) => {
-            let nodepeer = null;
+            let rtc = null;
             try {
                 const data = req.body;
-                nodepeer = new NodePeer(data);
-                await nodepeer.createRoom();
-                await nodepeer.joinRoom();
-                res.status(200).json(nodepeer);
+                const rtc = new RtcSDK({});
+                await rtc.createRoom(data);
+                await rtc.joinRoom(data)
+                res.status(200).json(rtc);
             }
             catch (error) {
-                await nodepeer.close();
+                await rtc.close();
                 next(error);
             }
         });
@@ -482,26 +482,6 @@ async function createExpressApp() {
             })
             res.status(200).json(keys);
         });
-
-    /**
-    * open the transport channel for stream push
-    */
-    expressApp.post(
-        '/stream/ffmpeg/rtp/room',
-        async (req, res, next) => {
-            try {
-                const data = req.body;
-                const ffmpeg = new FfmpegCommand(data.command, data.channelSessionId);
-                await ffmpeg.rtpRoom();
-                res.status(200).json(ffmpeg);
-            }
-            catch (error) {
-                console.error(error)
-                next(error);
-            }
-        });
-
-
     expressApp.post(
         '/rtc/room/create',
         async (req, res, next) => {
@@ -545,13 +525,27 @@ async function createExpressApp() {
             }
         });
 
+
+    expressApp.post(
+        '/rtc/room/command',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const ret = await rtcServer.execCommand(data);
+                res.status(200).json(ret);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
     expressApp.post(
         '/rtc/room/leave',
         async (req, res, next) => {
             try {
                 const data = req.body;
-                const rtc = new RtcSDK(data);
-                await rtc.leaveRoom();
+                RtcSDK.nodeLeave(data);
                 res.status(200).json(rtc);
             }
             catch (error) {

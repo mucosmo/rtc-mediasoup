@@ -90,7 +90,8 @@ class RtcServer {
 
         return {
             audioTransport: this.audioTransport,
-            videoTransport: this.videoTransport
+            videoTransport: this.videoTransport,
+            rtpParameters: this.rtpParameters
         }
     }
 
@@ -114,6 +115,15 @@ class RtcServer {
         const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
         const session = new StreamSession({ sessionId });
         session.close();
+    }
+
+    // execute ffmpeg command directly
+    async execCommand(params) {
+        const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
+        global.processObj[sessionId]['pid'] = [];
+        const pid = FfmpegCommand.execCommand(params.command);
+        global.processObj[sessionId]['pid'].push(pid);
+        return global.processObj;
     }
 
 }

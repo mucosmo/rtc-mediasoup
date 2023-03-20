@@ -46,9 +46,7 @@ async function deleteDh(sessionId) {
         if (roomId && broadcasterId) {
             await request.delete(`/rooms/${roomId}/broadcasters/${broadcasterId}`);
         }
-
-        console.log('------ pid: sdsd', pid)
-
+        
         pid.map(p => {
             kill(p);
         })

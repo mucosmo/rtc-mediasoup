@@ -8,35 +8,8 @@ const { StreamSession } = require('./session');
 class FfmpegCommand {
     constructor(command, channelSessionId) {
         this.command = command;
-        this.channelSessionId = channelSessionId;
-        this.sessionId = 'push_stream_' + uuidv4();
     }
 
-    async rtpRoom() {
-        const cp = exec(this.command);
-        global.processObj[this.sessionId] = { pid: cp.pid };
-        cp.on('message', message =>
-            console.log('ffmpeg::process::message [pid:%d, message:%o]', cp.pid, message)
-        )
-
-        cp.on('error', err =>
-            console.error('ffmpeg::process::error [pid:%d, message:%o]', cp.pid, err)
-        )
-
-        cp.stderr.on('data', data =>
-            console.log('err:' + data)
-        )
-
-        cp.stdout.on('data', data =>
-            console.log('data:' + data)
-        )
-
-        cp.once('close', () => {
-            this.closeSession()
-        });
-
-
-    }
 
     static fileToUdp(file, roomId, peerId) {
         const command = `ffmpeg -re -i /opt/dev/rtcSdk/files/tts/tts_${roomId}_${peerId}.wav -f mpegts udp://0.0.0.0:1234`;

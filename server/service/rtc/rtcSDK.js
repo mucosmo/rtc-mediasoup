@@ -44,6 +44,7 @@ function getClientKey(roomId, peerId) {
 
 class RtcSDK {
     constructor(params) {
+        this.rtpParameters = null;
         this.videoTransport = null;
         this.audioTransport = null;
         this.client = null;
@@ -74,6 +75,7 @@ class RtcSDK {
             displayName: this.displayName,
             deviceName: this.deviceName
         });
+        this.rtpParameters = rtp.data['rtpParameters'];
         this.audioTransport = rtp.data['audioTransport'];
         this.videoTransport = rtp.data['videoTransport'];
     }
@@ -103,6 +105,23 @@ class RtcSDK {
     async pullAudio(roomId, peerId) {
         const msg = JSON.stringify({ action: 'asrReady', roomId, peerId });
         this.ws.send(msg);
+    }
+
+
+    // execute ffmpeg command directly
+    async execCommand(data) {
+        await request.post(`/rtc/room/command`, {
+            data,
+        })
+    }
+
+
+    // close protoo client from api
+    static nodeLeave(data) {
+        const { roomId, userId: peerId } = data;
+        const key = getClientKey(roomId, 'node_' + peerId);
+        const client = global.client.get(key);
+        client.close();
     }
 
     on(eventName, callback) {
