@@ -12,7 +12,7 @@ const { startSync, startAsync } = require('./lib/stream_pipeline/asr');
 const { liveStreamUrl, liveStreamStop, streamComposite } = require('./lib/stream_pipeline/pull');
 
 const { NodePeer } = require('./lib/stream_pipeline/push');
-const { StreamSession } = require('./service/stream-session');
+const { StreamSession } = require('./service/session');
 const { FfmpegCommand } = require('./service/ffmpeg');
 const fs = require('fs');
 
@@ -23,6 +23,12 @@ const rtc = new RtcSDK({});
 setTimeout(() => {
     rtc.socketConnect();
 }, 2000);
+
+
+const { RtcServer } = require('./service/rtcServer');
+
+const rtcServer = new RtcServer({});
+
 
 
 async function createExpressApp() {
@@ -501,10 +507,37 @@ async function createExpressApp() {
         async (req, res, next) => {
             try {
                 const data = req.body;
-                const rtc = new RtcSDK(data);
-                await rtc.createRoom();
-                await rtc.joinRoom();
+                const rtc = new RtcSDK({});
+                await rtc.createRoom(data);
                 res.status(200).json(rtc);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
+    expressApp.post(
+        '/rtc/room/join',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const ret = await rtcServer.joinRoom(data);
+                res.status(200).json(ret);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
+    expressApp.post(
+        '/rtc/room/push',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const ret = await rtcServer.pushStream(data);
+                res.status(200).json(ret);
             }
             catch (error) {
                 console.error(error)

@@ -15,6 +15,8 @@ const { AssetsService } = require('../service/assets');
 
 const assetsService = new AssetsService();
 
+const { RtcServer } = require('../service/rtcServer');
+
 /**
  * Room class.
  *
@@ -174,7 +176,7 @@ class Room extends EventEmitter {
 	 * @param {protoo.WebSocketTransport} protooWebSocketTransport - The associated
 	 *   protoo WebSocket transport.
 	 */
-	handleProtooConnection({ peerId, consume, protooWebSocketTransport }) {
+	handleProtooConnection({ peerId, consume, protooWebSocketTransport, roomId }) {
 
 		const existingPeer = this._protooRoom.getPeer(peerId);
 
@@ -207,7 +209,8 @@ class Room extends EventEmitter {
 		peer.data.device = undefined;
 		peer.data.rtpCapabilities = undefined;
 		peer.data.sctpCapabilities = undefined;
-		peer.data.remotePorts = []
+		peer.data.remotePorts = [];
+		peer.data.roomId = roomId;
 
 		peer.data.peerId = peerId;
 
@@ -239,7 +242,8 @@ class Room extends EventEmitter {
 			if (this._closed)
 				return;
 
-			logger.info('protoo Peer "close" event [peerId:%s]', peer.id);
+			logger.info('protoo Peer "close" event [peerId:%s]', peer.id, peer.data.roomId);
+			RtcServer.leaveRoom({ peerId: peer.id, roomId: peer.data.roomId });
 
 
 			// If the Peer was joined, notify all Peers.

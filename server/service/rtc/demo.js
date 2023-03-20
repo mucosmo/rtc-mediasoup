@@ -1,6 +1,6 @@
 const { RtcSDK } = require('./rtcSDK');
 
-const rtc = new RtcSDK({ roomId: 1 });
+const rtc = new RtcSDK({});
 
 const fs = require('fs');
 
@@ -14,17 +14,16 @@ rtc.socketConnect().then(async () => {
     //     console.log(data)
     // });
 
-    const audio = fs.readFileSync('/opt/dev/rtcSdk/server/service/rtc/tts.text', 'utf-8');
-    rtc.pushAuido(rtc.roomId, rtc.peerId, audio);
+    // const audio = fs.readFileSync('/opt/dev/rtcSdk/server/service/rtc/tts.text', 'utf-8');
+    // rtc.pushAuido(rtc.roomId, rtc.peerId, audio);
 
-
-    await rtc.createRoom();
+    await rtc.createRoom({roomId: '21', userId: '4'});
     await rtc.joinRoom();
-    rtc.pushDh('/opt/dev/rtcSdk/files/resources/forest.mp4');
+    rtc.pushStream('/opt/dev/rtcSdk/files/resources/40_input.mp4');
 
-
-
-
+    setTimeout(() => {
+        rtc.leaveRoom();
+    }, 15000);
 
 });
 

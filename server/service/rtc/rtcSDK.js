@@ -44,18 +44,13 @@ function getClientKey(roomId, peerId) {
 
 class RtcSDK {
     constructor(params) {
-        this.rtpParameters = {
-            AUDIO_SSRC: params.AUDIO_SSRC || 1111,
-            AUDIO_PT: params.AUDIO_PT || 100,
-            VIDEO_SSRC: params.VIDEO_SSRC || 2222,
-            VIDEO_PT: params.VIDEO_PT || 101
-        };
         this.videoTransport = null;
         this.audioTransport = null;
         this.client = null;
         this.eventEmitter = new EventEmitter();
         this.ws = null;
         this.audioSocketUrl = params.audioSocketUrl || rtcConfig.RTC_AUDIO_WSS_BASEURL;
+        this.clientKey = null;
     }
 
 
@@ -64,90 +59,38 @@ class RtcSDK {
         this.peerId = 'node_' + (params.userId || Math.random().toString(36).slice(2));
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
-        this.sessionId = 'push_stream_' + uuidv4();
         const wssBaseUrl = rtcConfig.RTC_SERVER_WSS_BASEURL;
         const protooUrl = `${wssBaseUrl}/?roomId=${this.roomId}&peerId=${this.peerId}`;
         this.client = await protooConnect(protooUrl);
-        const key = getClientKey(this.roomId, this.peerId);
-        global.client.set(key, this.client);
+        this.clientKey = getClientKey(this.roomId, this.peerId);
+        global.client.set(this.clientKey, this.client);
     }
 
 
     async joinRoom() {
-        // 验证房间是否存在
-        await request.get(`/rooms/${this.roomId}`);
-        await request.post(`rooms/${this.roomId}/broadcasters`, {
-            id: this.peerId,
+        const rtp = await request.post(`/rtc/room/join`, {
+            roomId: this.roomId,
+            peerId: this.peerId,
             displayName: this.displayName,
-            device: { 'name': this.deviceName }
+            deviceName: this.deviceName
         });
+        this.audioTransport = rtp.data['audioTransport'];
+        this.videoTransport = rtp.data['videoTransport'];
+    }
 
-        // 创建 mediasoup audio plainTransport
-        let res = await request.post(`rooms/${this.roomId}/broadcasters/${this.peerId}/transports`, {
-            type: 'plain',
-            comedia: true,
-            rtcpMux: false
-        })
-        this.audioTransport = res.data
-
-        // 创建 mediasoup video plainTransport
-        res = await request.post(`rooms/${this.roomId}/broadcasters/${this.peerId}/transports`, {
-            type: 'plain',
-            comedia: true,
-            rtcpMux: false
-        })
-        this.videoTransport = res.data
-
-        const { AUDIO_PT, AUDIO_SSRC, VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
-        // 创建 mediasoup audio producer
-        await request.post(`/rooms/${this.roomId}/broadcasters/${this.peerId}/transports/${this.audioTransport.id}/producers`, {
-            kind: 'audio',
-            rtpParameters: {
-                codecs: [
-                    {
-                        mimeType: 'audio/opus',
-                        payloadType: AUDIO_PT,
-                        clockRate: 48000,
-                        channels: 2,
-                        parameters: {
-                            'sprop-stereo': 1
-                        }
-                    }
-                ],
-                encodings: [{
-                    ssrc: AUDIO_SSRC
-                }]
-            },
-        })
-
-        // 创建 mediasoup video producer
-        await request.post(`/rooms/${this.roomId}/broadcasters/${this.peerId}/transports/${this.videoTransport.id}/producers`, {
-            kind: 'video',
-            rtpParameters: {
-                codecs: [
-                    {
-                        mimeType: 'video/vp8',
-                        payloadType: VIDEO_PT,
-                        clockRate: 90000
-                    }
-                ],
-                encodings: [{
-                    ssrc: VIDEO_SSRC
-                }]
-            },
-        })
-
-        return {
-            rtpParameters: this.rtpParameters,
+    async pushStream(url) {
+        await request.post(`/rtc/room/push`, {
+            url,
+            roomId: this.roomId,
+            peerId: this.peerId,
+            videoTransport: this.videoTransport,
             audioTransport: this.audioTransport,
-            videoTransport: this.videoTransport
-        }
+        });
     }
 
 
     async leaveRoom() {
-        const key = getClientKey(this.roomId, this.peerId);
-        const client = global.client.get(key);
+        const client = global.client.get(this.clientKey);
         client.close();
     }
 
@@ -188,21 +131,7 @@ class RtcSDK {
         this.ws.send(msg);
     }
 
-    async pushDh(url) {
-        const msg = JSON.stringify({
-            action: 'pushDh',
-            roomId: this.roomId,
-            peerId: this.peerId,
-            rtp: {
-                rtpParameters: this.rtpParameters,
-                url,
-                videoTransport: this.videoTransport,
-                audioTransport: this.audioTransport,
-                sessionId: this.sessionId
-            }
-        });
-        this.ws.send(msg);
-    }
+
 }
 
 module.exports.RtcSDK = RtcSDK;

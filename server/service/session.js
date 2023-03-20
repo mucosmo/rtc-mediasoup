@@ -27,6 +27,11 @@ class StreamSession {
         }
     }
 
+    static getPushStreamSessionId(roomId, peerId) {
+        return 'push_stream_' + roomId + '_' + peerId;
+    }
+
+
     get() {
         return this.sessions;
     }
@@ -41,7 +46,12 @@ async function deleteDh(sessionId) {
         if (roomId && broadcasterId) {
             await request.delete(`/rooms/${roomId}/broadcasters/${broadcasterId}`);
         }
-        pid && kill(pid);
+
+        console.log('------ pid: sdsd', pid)
+
+        pid.map(p => {
+            kill(p);
+        })
         delete global.processObj[sessionId];
         return { broadcasterId, pid, sessionId }
     } catch (err) {

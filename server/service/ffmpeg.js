@@ -2,7 +2,7 @@
 const { v4: uuidv4 } = require('uuid');
 const kill = require('tree-kill');
 const { exec } = require('child_process');
-const { StreamSession } = require('./stream-session');
+const { StreamSession } = require('./session');
 
 
 class FfmpegCommand {
@@ -51,12 +51,15 @@ class FfmpegCommand {
         cp.stderr.on('data', data => {
             if (!command.includes('udp://0.0.0.0:1234')) return;
             console.log('==execCommand --err:' + data)
-        }
-        )
+        })
+        cp.once('close', () => {
+            this.closeSession()
+        });
+
+        return cp.pid;
     }
 
-    async closeSession() {
-        const sessionId = this.channelSessionId;
+    async closeSession(sessionId) {
         global.dh.get(sessionId)?.close();
         global.dh.delete(sessionId);
         const streamSession = new StreamSession({ sessionId });
