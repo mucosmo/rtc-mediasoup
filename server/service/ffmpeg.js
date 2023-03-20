@@ -19,24 +19,18 @@ class FfmpegCommand {
         )
     }
 
-    static execCommand(command) {
+    static execCommand(command, sessionId) {
         const cp = exec(command);
         cp.stderr.on('data', data => {
             if (!command.includes('udp://0.0.0.0:1234')) return;
             console.log('==execCommand --err:' + data)
         })
         cp.once('close', () => {
-            this.closeSession()
+            const streamSession = new StreamSession({ sessionId });
+            streamSession.close();
         });
 
         return cp.pid;
-    }
-
-    async closeSession(sessionId) {
-        global.dh.get(sessionId)?.close();
-        global.dh.delete(sessionId);
-        const streamSession = new StreamSession({ sessionId });
-        await streamSession.close();
     }
 }
 

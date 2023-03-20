@@ -13,8 +13,6 @@ const request = axios.create({
     timeout: 10000,
 });
 
-global.dh = new Map();
-
 async function protooConnect(protooUrl) {
     return new Promise((resolve, reject) => {
         const protooTransport = new protooClient.WebSocketTransport(protooUrl);
@@ -46,7 +44,6 @@ class NodePeer {
     }
     async createRoom() {
         this.client = await protooConnect(this.protooUrl)
-        global.dh.set(this.sessionId, this.client);
     }
 
     /**

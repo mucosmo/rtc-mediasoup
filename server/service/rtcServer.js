@@ -102,12 +102,12 @@ class RtcServer {
         const rtp = params;
         rtp.rtpParameters = this.rtpParameters;
         const video = getVideoCommand(rtp);
-        let pid = FfmpegCommand.execCommand(video);
+        let pid = FfmpegCommand.execCommand(video, sessionId);
 
         global.processObj[sessionId]['pid'].push(pid);
 
         const audio = getAudioCommand(rtp);
-        pid = FfmpegCommand.execCommand(audio);
+        pid = FfmpegCommand.execCommand(audio, sessionId);
         global.processObj[sessionId]['pid'].push(pid);
     }
 
@@ -121,7 +121,7 @@ class RtcServer {
     async execCommand(params) {
         const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
         global.processObj[sessionId]['pid'] = [];
-        const pid = FfmpegCommand.execCommand(params.command);
+        const pid = FfmpegCommand.execCommand(params.command, sessionId);
         global.processObj[sessionId]['pid'].push(pid);
         return global.processObj;
     }

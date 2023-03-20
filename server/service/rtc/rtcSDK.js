@@ -129,9 +129,9 @@ class RtcSDK {
         this.eventEmitter.on(eventName, callback)
     }
 
-    async socketConnect(roomId, peerId) {
+    async socketConnect() {
         return new Promise((resolve, reject) => {
-            const socketUrl = this.audioSocketUrl + '/?roomId=' + roomId + '&peerId=' + peerId;
+            const socketUrl = this.audioSocketUrl;
             const ws = new WebSocket(socketUrl);
             this.ws = ws;
             ws.on('open', function open() {
