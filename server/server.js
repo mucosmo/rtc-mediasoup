@@ -237,7 +237,7 @@ function pushAudio(msg) {
 
 function base64ToWav(roomId, peerId, audio) {
 	const buffer = Buffer.from(audio, 'base64');
-	const path = `../files/tts/ttx_${roomId}_${peerId}.wav`;
+	const path = `../files/tts/tts_${roomId}_${peerId}.wav`;
 	fs.writeFileSync(path, buffer);
 	return path;
 }
