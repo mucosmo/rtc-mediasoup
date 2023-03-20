@@ -34,6 +34,8 @@ const logger = new Logger();
 
 const Stream = require('./lib/stream');
 
+const kill = require('tree-kill');
+
 // Async queue to manage rooms.
 // @type {AwaitQueue}
 const queue = new AwaitQueue();
@@ -190,19 +192,33 @@ async function runHttpsServer() {
  */
 async function runAsrSocketServer() {
 	logger.info('running an AsrSocket server...');
+	const clients = new Map();
 	const wss = new WebSocket.Server({ port: process.env.RTC_AUDIO_WSS_PORT });
-	wss.on('connection', function (ws) {
-		console.log('======client connected');
+	wss.on('connection', function (ws, req) {
 		ws.on('message', function (data, isBinary) {
 			const message = isBinary ? data : data.toString();
 			const msg = JSON.parse(message);
-			if (msg.action == 'asrReady') {
+			if (msg.action == 'asr') {
 				const { roomId, peerId } = msg;
-				pullAudio(roomId, peerId, ws);
+				const process = pullAudio(roomId, peerId, ws);
+				clients.set(ws, process.pid);
 			} else if (msg.action == 'tts') {
 				pushAudio(msg);
 			}
 		});
+
+		ws.on('close', function () {
+			// 关闭 gst 进程
+			const pid = clients.get(ws);
+			kill(pid);
+			delete clients[ws];
+		});
+	});
+
+	wss.on('close', function () {
+		clients.values().forEach(pid => {
+			kill(pid);
+		})
 	});
 }
 
@@ -212,7 +228,7 @@ function pullAudio(roomId, peerId, ws) {
 		const audioRtpParams = global.streamInfo[roomId][peerId]['audio'];
 		const consumers = global.streamInfo[roomId][peerId]['consumers'];
 
-		new GStreamer({ audio: audioRtpParams }, ws);
+		const gst = new GStreamer({ audio: audioRtpParams }, ws);
 
 		setTimeout(async () => {
 			for (const [id, consumer] of consumers) {
@@ -220,6 +236,7 @@ function pullAudio(roomId, peerId, ws) {
 				await consumer.requestKeyFrame();
 			}
 		}, 1000);
+		return gst._process;
 	} catch (err) {
 		console.error(err)
 	}

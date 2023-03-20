@@ -54,7 +54,6 @@ class RtcSDK {
         this.clientKey = null;
     }
 
-
     async createRoom(params) {
         this.roomId = params.roomId || Math.random().toString(36).slice(2);
         this.peerId = 'node_' + (params.userId || Math.random().toString(36).slice(2));
@@ -67,9 +66,8 @@ class RtcSDK {
         global.client.set(this.clientKey, this.client);
     }
 
-
     async joinRoom() {
-        const rtp = await request.post(`/rtc/room/join`, {
+        const rtp = await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/join`, {
             roomId: this.roomId,
             peerId: this.peerId,
             displayName: this.displayName,
@@ -81,7 +79,7 @@ class RtcSDK {
     }
 
     async pushStream(url) {
-        await request.post(`/rtc/room/push`, {
+        await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/push`, {
             url,
             roomId: this.roomId,
             peerId: this.peerId,
@@ -90,10 +88,10 @@ class RtcSDK {
         });
     }
 
-
     async leaveRoom() {
         const client = global.client.get(this.clientKey);
         client.close();
+        this.ws.close();
     }
 
     async roomStats() {
@@ -103,23 +101,26 @@ class RtcSDK {
     }
 
     async pullAudio(roomId, peerId) {
-        const msg = JSON.stringify({ action: 'asrReady', roomId, peerId });
+        const msg = JSON.stringify({ action: 'asr', roomId, peerId });
         this.ws.send(msg);
     }
 
+    async pushAudio(roomId, peerId, audio) {
+        const msg = JSON.stringify({ action: 'tts', roomId, peerId, audio });
+        this.ws.send(msg);
+    }
 
     // execute ffmpeg command directly
     async execCommand(data) {
-        await request.post(`/rtc/room/command`, {
+        await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/command`, {
             data,
         })
     }
 
-
     // close protoo client from api
     static nodeLeave(data) {
         const { roomId, userId: peerId } = data;
-        const key = getClientKey(roomId, 'node_' + peerId);
+        const key = getClientKey(roomId, peerId);
         const client = global.client.get(key);
         client.close();
     }
@@ -128,9 +129,10 @@ class RtcSDK {
         this.eventEmitter.on(eventName, callback)
     }
 
-    async socketConnect() {
+    async socketConnect(roomId, peerId) {
         return new Promise((resolve, reject) => {
-            const ws = new WebSocket(this.audioSocketUrl);
+            const socketUrl = this.audioSocketUrl + '/?roomId=' + roomId + '&peerId=' + peerId;
+            const ws = new WebSocket(socketUrl);
             this.ws = ws;
             ws.on('open', function open() {
                 resolve(ws);
@@ -145,12 +147,9 @@ class RtcSDK {
         })
     }
 
-    async pushAudio(roomId, peerId, audio) {
-        const msg = JSON.stringify({ action: 'tts', roomId, peerId, audio });
-        this.ws.send(msg);
+    async socketClose() {
+        this.ws.close();
     }
-
-
 }
 
 module.exports.RtcSDK = RtcSDK;

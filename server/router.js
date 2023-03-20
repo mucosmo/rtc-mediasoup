@@ -545,6 +545,7 @@ async function createExpressApp() {
         async (req, res, next) => {
             try {
                 const data = req.body;
+                data.userId = 'node_' + data.userId;
                 RtcSDK.nodeLeave(data);
                 res.status(200).json(rtc);
             }
