@@ -228,7 +228,7 @@ function pullAudio(roomId, peerId, ws) {
 		const audioRtpParams = global.streamInfo[roomId][peerId]['audio'];
 		const consumers = global.streamInfo[roomId][peerId]['consumers'];
 
-		const gst = new GStreamer({ audio: audioRtpParams }, ws);
+		const gst = new GStreamer({ audio: audioRtpParams }, ws, roomId + '_' + peerId);
 
 		setTimeout(async () => {
 			for (const [id, consumer] of consumers) {

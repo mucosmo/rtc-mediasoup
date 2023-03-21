@@ -14,12 +14,13 @@ const GSTREAMER_COMMAND = 'gst-launch-1.0';
 const GSTREAMER_OPTIONS = '-v -e -q';
 
 module.exports = class GStreamer {
-  constructor(rtpParameters, ws) {
+  constructor(rtpParameters, ws, user) {
     this._rtpParameters = rtpParameters;
     this._process = undefined;
     this._observer = new EventEmitter();
     this._createProcess();
     this.ws = ws;
+    this.user = user;
   }
 
   async _createProcess() {
