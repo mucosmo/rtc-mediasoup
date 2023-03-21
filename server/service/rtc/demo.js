@@ -26,17 +26,16 @@ const fs = require('fs');
 // // 推送音视频
 setTimeout(async () => {
     // 创建房间
-    await rtc.createRoom({ roomId: 'mixer', userId: '4' });
+    await rtc.joinRoom({ roomId: 'mixer' });
 
-    // 加入房间
-    await rtc.joinRoom();
+    // // 推送音视频
+    // await rtc.pushStream({ video: '/opt/dev/rtcSdk/files/resources/filevideo.mp4', audio: '/opt/dev/rtcSdk/files/resources/彩虹.mp3' });
+    // await rtc.pushStream({ video: '/opt/dev/rtcSdk/files/resources/filevideo.mp4' });
+    // await rtc.pushStream({ audio: '/opt/dev/rtcSdk/files/resources/彩虹.mp3' });
 
-    // 推送视频
-    await rtc.pushStream('/opt/dev/rtcSdk/files/resources/40_input.mp4');
-
-    // 推送音频（base64)
-    const audio = fs.readFileSync('/opt/dev/rtcSdk/server/service/rtc/tts.text', 'utf-8')
-    rtc.pushAudio('mixer', '4', audio);
+    // // 推送音频（base64)
+    // const audio = fs.readFileSync('/opt/dev/rtcSdk/server/service/rtc/tts.text', 'utf-8')
+    // rtc.pushAudioStream('mixer', '4', audio);
 
     // 离开房间
     setTimeout(() => {

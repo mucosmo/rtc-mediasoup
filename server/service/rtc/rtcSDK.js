@@ -54,7 +54,7 @@ class RtcSDK {
         this.clientKey = null;
     }
 
-    async createRoom(params) {
+    async joinRoom(params) {
         this.roomId = params.roomId || Math.random().toString(36).slice(2);
         this.userId = params.userId || Math.random().toString(36).slice(2);
         this.peerId = 'node_' + this.userId;
@@ -67,25 +67,43 @@ class RtcSDK {
         global.client.set(this.clientKey, this.client);
     }
 
-    async joinRoom() {
-        const rtp = await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/join`, {
+    async produce(params) {
+        const rtp = await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/produce`, {
             roomId: this.roomId,
             peerId: this.peerId,
             displayName: this.displayName,
-            deviceName: this.deviceName
+            deviceName: this.deviceName,
+            video: params.video,
+            audio: params.audio
         });
-        this.rtpParameters = rtp.data['rtpParameters'];
-        this.audioTransport = rtp.data['audioTransport'];
-        this.videoTransport = rtp.data['videoTransport'];
+        return rtp.data;
+    }
+    async pushStream(params){
+        const rtp = await this.produce({ video: params.video, audio:params.audio });
+        if(params.video){
+            await this.pushVideo(params.video, rtp);
+        }
+
+        if(params.audio){
+            await this.pushAudio(params.audio, rtp);
+        }
     }
 
-    async pushStream(url) {
+    async pushVideo(url, rtp) {
         await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/push`, {
             url,
             roomId: this.roomId,
             peerId: this.peerId,
-            videoTransport: this.videoTransport,
-            audioTransport: this.audioTransport,
+            videoTransport: rtp.videoTransport,
+        });
+    }
+
+    async pushAudio(url, rtp) {
+        await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/push`, {
+            url,
+            roomId: this.roomId,
+            peerId: this.peerId,
+            audioTransport: rtp.audioTransport
         });
     }
 
@@ -105,12 +123,16 @@ class RtcSDK {
         this.ws.send(msg);
     }
 
-    async pushAudio(roomId, peerId, audio) {
+    async pushTTS(roomId, peerId, audio) {
         await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/audio/push`, {
             roomId,
             peerId,
             audio
         });
+    }
+
+    async pushAudioStream(roomId, peerId, audio) {
+
     }
 
     // execute ffmpeg command directly

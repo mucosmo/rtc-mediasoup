@@ -21,7 +21,7 @@ class RtcServer {
         };
     }
 
-    async joinRoom(params) {
+    async produce(params) {
         this.sessionId = 'push_stream_' + uuidv4();
         const { roomId, peerId, displayName, deviceName } = params;
         // 验证房间是否存在
@@ -32,25 +32,36 @@ class RtcServer {
             device: { 'name': deviceName }
         });
 
+        if (params.audio) {
+            this.audioTransport = await this.produceAudio(roomId, peerId);
+        }
+
+        if (params.video) {
+            this.videoTransport = await this.produceVideo(roomId, peerId);
+        }
+
+        const sessionId = StreamSession.getPushStreamSessionId(roomId, peerId);
+        global.processObj[sessionId] = { roomId: roomId, broadcasterId: peerId };
+
+        return {
+            audioTransport: this.audioTransport,
+            videoTransport: this.videoTransport,
+            rtpParameters: this.rtpParameters
+        }
+    }
+
+    async produceAudio(roomId, peerId) {
         // 创建 mediasoup audio plainTransport
         let res = await request.post(`rooms/${roomId}/broadcasters/${peerId}/transports`, {
             type: 'plain',
             comedia: true,
             rtcpMux: false
         })
-        this.audioTransport = res.data
+        const audioTransport = res.data
 
-        // 创建 mediasoup video plainTransport
-        res = await request.post(`rooms/${roomId}/broadcasters/${peerId}/transports`, {
-            type: 'plain',
-            comedia: true,
-            rtcpMux: false
-        })
-        this.videoTransport = res.data
-
-        const { AUDIO_PT, AUDIO_SSRC, VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
+        const { AUDIO_PT, AUDIO_SSRC } = this.rtpParameters;
         // 创建 mediasoup audio producer
-        await request.post(`/rooms/${roomId}/broadcasters/${peerId}/transports/${this.audioTransport.id}/producers`, {
+        await request.post(`/rooms/${roomId}/broadcasters/${peerId}/transports/${audioTransport.id}/producers`, {
             kind: 'audio',
             rtpParameters: {
                 codecs: [
@@ -69,9 +80,21 @@ class RtcServer {
                 }]
             },
         })
+        return audioTransport;
+    }
+
+    async produceVideo(roomId, peerId) {
+        const { VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
+        // 创建 mediasoup video plainTransport
+        const res = await request.post(`rooms/${roomId}/broadcasters/${peerId}/transports`, {
+            type: 'plain',
+            comedia: true,
+            rtcpMux: false
+        })
+        const videoTransport = res.data
 
         // 创建 mediasoup video producer
-        await request.post(`/rooms/${roomId}/broadcasters/${peerId}/transports/${this.videoTransport.id}/producers`, {
+        await request.post(`/rooms/${roomId}/broadcasters/${peerId}/transports/${videoTransport.id}/producers`, {
             kind: 'video',
             rtpParameters: {
                 codecs: [
@@ -86,31 +109,27 @@ class RtcServer {
                 }]
             },
         })
-
-        const sessionId = StreamSession.getPushStreamSessionId(roomId, peerId);
-        global.processObj[sessionId] = { roomId: roomId, broadcasterId: peerId };
-
-        return {
-            audioTransport: this.audioTransport,
-            videoTransport: this.videoTransport,
-            rtpParameters: this.rtpParameters
-        }
+        return videoTransport;
     }
 
     async pushStream(params) {
         const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
         global.processObj[sessionId]['pid'] = [];
-
         const rtp = params;
         rtp.rtpParameters = this.rtpParameters;
-        const video = getVideoCommand(rtp);
-        let pid = FfmpegCommand.execCommand(video, sessionId);
+        let pid;
 
-        global.processObj[sessionId]['pid'].push(pid);
+        if (rtp.videoTransport) {
+            const video = getVideoCommand(rtp);
+            pid = FfmpegCommand.execCommand(video, sessionId);
+            global.processObj[sessionId]['pid'].push(pid);
+        }
 
-        const audio = getAudioCommand(rtp);
-        pid = FfmpegCommand.execCommand(audio, sessionId);
-        global.processObj[sessionId]['pid'].push(pid);
+        if (rtp.audioTransport) {
+            const audio = getAudioCommand(rtp);
+            pid = FfmpegCommand.execCommand(audio, sessionId);
+            global.processObj[sessionId]['pid'].push(pid);
+        }
     }
 
     static leaveRoom(params) {
@@ -157,7 +176,7 @@ function getVideoCommand(rtp) {
 
 function getAudioCommand(rtp) {
     // http://downsc.chinaz.net/Files/DownLoad/sound1/201906/11582.mp3
-    const input = `ffmpeg -re -i ${audioUdp}`;
+    const input = `ffmpeg -re -i ${rtp.url}`;
     const audioSink = [
         `-map "0:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
         `-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`

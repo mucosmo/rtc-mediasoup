@@ -498,11 +498,11 @@ async function createExpressApp() {
         });
 
     expressApp.post(
-        '/rtc/room/join',
+        '/rtc/room/produce',
         async (req, res, next) => {
             try {
                 const data = req.body;
-                const ret = await rtcServer.joinRoom(data);
+                const ret = await rtcServer.produce(data);
                 res.status(200).json(ret);
             }
             catch (error) {
