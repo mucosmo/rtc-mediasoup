@@ -2,7 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const axios = require('axios');
 const request = axios.create({
-    baseURL: 'https://chaosyhy.com:4445',
+    baseURL: process.env.RTC_SERVER_HTTPS_BASEURL,
     timeout: 10000,
 });
 
