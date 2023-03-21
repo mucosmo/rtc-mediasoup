@@ -11,6 +11,8 @@ const { StreamSession } = require('./session');
 
 const audioUdp = `udp://0.0.0.0:${Math.floor(Math.random() * 10000)}`;
 
+const TTSUDP = new Map();
+
 class RtcServer {
     constructor(params) {
         this.rtpParameters = {
@@ -130,6 +132,33 @@ class RtcServer {
             pid = FfmpegCommand.execCommand(audio, sessionId);
             global.processObj[sessionId]['pid'].push(pid);
         }
+    }
+
+    async pushTTS(params) {
+        const fs = require('fs');
+        const { roomId, peerId, audio } = params;
+        const buffer = Buffer.from(audio, 'base64');
+        const path = `/opt/dev/rtcSdk/files/tts/tts_${roomId}_${peerId}.wav`;
+        fs.writeFileSync(path, buffer);
+
+        const rtp = params;
+        rtp.rtpParameters = this.rtpParameters;
+
+        const key = `${roomId}_${peerId}`;
+        let udpAddr = TTSUDP.get(key);
+
+        if (!udpAddr) {
+            udpAddr = `udp://0.0.0.0:${Math.floor(Math.random() * 10000)}`;
+            TTSUDP.set(key, udpAddr);
+            rtp.url = udpAddr;
+            const command = getAudioCommand(rtp);
+            rtp.command = command;
+            await this.execCommand(rtp);
+        }
+
+        const command = `ffmpeg -re -i ${path} -f mpegts ${udpAddr}`;
+        params.command = command;
+        this.execCommand(params);
     }
 
     static leaveRoom(params) {

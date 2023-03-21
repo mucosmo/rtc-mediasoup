@@ -78,13 +78,13 @@ class RtcSDK {
         });
         return rtp.data;
     }
-    async pushStream(params){
-        const rtp = await this.produce({ video: params.video, audio:params.audio });
-        if(params.video){
+    async pushStream(params) {
+        const rtp = await this.produce({ video: params.video, audio: params.audio });
+        if (params.video) {
             await this.pushVideo(params.video, rtp);
         }
 
-        if(params.audio){
+        if (params.audio) {
             await this.pushAudio(params.audio, rtp);
         }
     }
@@ -123,12 +123,20 @@ class RtcSDK {
         this.ws.send(msg);
     }
 
-    async pushTTS(roomId, peerId, audio) {
-        await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/audio/push`, {
-            roomId,
-            peerId,
-            audio
+    async pushTTS(params) {
+        let rtp = null;
+        if (!params.peerId) {
+            rtp = await this.produce({ audio: true });
+        }
+        const userId = params.peerId || Math.random().toString(36).slice(2);
+        await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/push/tts`, {
+            roomId: params.roomId,
+            peerId: 'node_tts_' + userId,
+            audioTransport: rtp.audioTransport,
+            audio: params.audio,
         });
+
+        return { roomId: params.roomId, peerId: userId }
     }
 
     async pushAudioStream(roomId, peerId, audio) {
