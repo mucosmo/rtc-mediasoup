@@ -91,7 +91,6 @@ class RtcSDK {
     async leaveRoom() {
         const client = global.client.get(this.clientKey);
         client.close();
-        this.ws.close();
     }
 
     async roomStats() {

@@ -9,6 +9,8 @@ const request = axios.create({
 const { FfmpegCommand } = require('./ffmpeg');
 const { StreamSession } = require('./session');
 
+const audioUdp = `udp://0.0.0.0:${Math.floor(Math.random() * 10000)}`;
+
 class RtcServer {
     constructor(params) {
         this.rtpParameters = {
@@ -120,18 +122,22 @@ class RtcServer {
     // execute ffmpeg command directly
     async execCommand(params) {
         const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
+        if (!global.processObj[sessionId]) {
+            global.processObj[sessionId] = { roomId: params.roomId, broadcasterId: params.peerId };
+        }
         global.processObj[sessionId]['pid'] = [];
         const pid = FfmpegCommand.execCommand(params.command, sessionId);
         global.processObj[sessionId]['pid'].push(pid);
         return global.processObj;
     }
 
-    static pushAudio(params){
+    pushAudio(params) {
+        const fs = require('fs');
         const { roomId, peerId, audio } = params;
         const buffer = Buffer.from(audio, 'base64');
         const path = `/opt/dev/rtcSdk/files/tts/tts_${roomId}_${peerId}.wav`;
         fs.writeFileSync(path, buffer);
-        const command =  `ffmpeg -re -i ${path} -f mpegts udp://0.0.0.0:1234`;
+        const command = `ffmpeg -re -i ${path} -f mpegts ${audioUdp}`;
         params.command = command;
         this.execCommand(params);
     }
@@ -151,7 +157,7 @@ function getVideoCommand(rtp) {
 
 function getAudioCommand(rtp) {
     // http://downsc.chinaz.net/Files/DownLoad/sound1/201906/11582.mp3
-    const input = `ffmpeg -re -i https://chaosyhy.com:60125/files/16k-2.mp3`;
+    const input = `ffmpeg -re -i ${audioUdp}`;
     const audioSink = [
         `-map "0:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
         `-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`
