@@ -126,6 +126,16 @@ class RtcServer {
         return global.processObj;
     }
 
+    static pushAudio(params){
+        const { roomId, peerId, audio } = params;
+        const buffer = Buffer.from(audio, 'base64');
+        const path = `/opt/dev/rtcSdk/files/tts/tts_${roomId}_${peerId}.wav`;
+        fs.writeFileSync(path, buffer);
+        const command =  `ffmpeg -re -i ${path} -f mpegts udp://0.0.0.0:1234`;
+        params.command = command;
+        this.execCommand(params);
+    }
+
 }
 
 function getVideoCommand(rtp) {

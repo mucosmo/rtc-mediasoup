@@ -525,6 +525,20 @@ async function createExpressApp() {
             }
         });
 
+        expressApp.post(
+            '/rtc/room/audio/push',
+            async (req, res, next) => {
+                try {
+                    const data = req.body;
+                    const ret = await rtcServer.pushAudio(data);
+                    res.status(200).json(ret);
+                }
+                catch (error) {
+                    console.error(error)
+                    next(error);
+                }
+            });
+
 
     expressApp.post(
         '/rtc/room/command',

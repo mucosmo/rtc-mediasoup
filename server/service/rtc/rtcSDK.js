@@ -106,8 +106,11 @@ class RtcSDK {
     }
 
     async pushAudio(roomId, peerId, audio) {
-        const msg = JSON.stringify({ action: 'tts', roomId, peerId, audio });
-        this.ws.send(msg);
+        await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/audio/push`, {
+            roomId,
+            peerId,
+            audio
+        });
     }
 
     // execute ffmpeg command directly

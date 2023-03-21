@@ -202,8 +202,6 @@ async function runAsrSocketServer() {
 				const { roomId, peerId } = msg;
 				const process = pullAudio(roomId, peerId, ws);
 				clients.set(ws, process.pid);
-			} else if (msg.action == 'tts') {
-				pushAudio(msg);
 			}
 		});
 
@@ -240,21 +238,6 @@ function pullAudio(roomId, peerId, ws) {
 	} catch (err) {
 		console.error(err)
 	}
-}
-
-
-// 推送（添加音频）
-function pushAudio(msg) {
-	const { roomId, peerId, audio } = msg;
-	const path = base64ToWav(roomId, peerId, audio);
-	FfmpegCommand.fileToUdp(path, roomId, peerId);
-}
-
-function base64ToWav(roomId, peerId, audio) {
-	const buffer = Buffer.from(audio, 'base64');
-	const path = `../files/tts/tts_${roomId}_${peerId}.wav`;
-	fs.writeFileSync(path, buffer);
-	return path;
 }
 
 /**
