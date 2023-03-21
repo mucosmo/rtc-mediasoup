@@ -9,7 +9,7 @@ const fs = require('fs');
 // rtc.socketConnect().then(async () => {
 //     const ret = await rtc.roomStats();
 //     let roomId = 'mixer';
-//     let peerId = ret[0]['members'][0];
+//     let peerId = 'browser_1234';
 
 //     rtc.pullAudio(roomId, peerId);
 //     rtc.on('newAudioData', (data) => {
