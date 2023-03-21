@@ -56,7 +56,8 @@ class RtcSDK {
 
     async createRoom(params) {
         this.roomId = params.roomId || Math.random().toString(36).slice(2);
-        this.peerId = 'node_' + (params.userId || Math.random().toString(36).slice(2));
+        this.userId = params.userId || Math.random().toString(36).slice(2);
+        this.peerId = 'node_' + this.userId;
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
         const wssBaseUrl = rtcConfig.RTC_SERVER_WSS_BASEURL;
