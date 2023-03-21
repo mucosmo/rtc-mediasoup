@@ -28,11 +28,15 @@ class RtcServer {
         const { roomId, peerId, displayName, deviceName } = params;
         // 验证房间是否存在
         await request.get(`/rooms/${roomId}`);
-        await request.post(`rooms/${roomId}/broadcasters`, {
-            id: peerId,
-            displayName: displayName,
-            device: { 'name': deviceName }
-        });
+        try {
+            await request.post(`rooms/${roomId}/broadcasters`, {
+                id: peerId,
+                displayName: displayName,
+                device: { 'name': deviceName }
+            });
+        } catch (error) {
+            console.error(error);
+        }
 
         if (params.audio) {
             this.audioTransport = await this.produceAudio(roomId, peerId);

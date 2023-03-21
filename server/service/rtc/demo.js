@@ -30,13 +30,12 @@ setTimeout(async () => {
 
     // // 推送音视频
     // await rtc.pushStream({ video: '/opt/dev/rtcSdk/files/resources/filevideo.mp4', audio: '/opt/dev/rtcSdk/files/resources/彩虹.mp3' });
-    // await rtc.pushStream({ video: '/opt/dev/rtcSdk/files/resources/filevideo.mp4' });
+    await rtc.pushStream({ video: '/opt/dev/rtcSdk/files/resources/filevideo.mp4' });
     // await rtc.pushStream({ audio: '/opt/dev/rtcSdk/files/resources/彩虹.mp3' });
 
     // 推送音频（base64)
     const audio = fs.readFileSync('/opt/dev/rtcSdk/server/service/rtc/tts.text', 'utf-8')
-    const ret = await rtc.pushTTS({ roomId: 'mixer', audio });
-    console.log(ret)
+    await rtc.pushTTS(audio);
 
     // 离开房间
     setTimeout(() => {

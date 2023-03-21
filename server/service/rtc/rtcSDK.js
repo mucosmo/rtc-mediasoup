@@ -123,20 +123,18 @@ class RtcSDK {
         this.ws.send(msg);
     }
 
-    async pushTTS(params) {
+    async pushTTS(audio) {
         let rtp = null;
-        if (!params.peerId) {
+        if (!this.ttsJoined) {
             rtp = await this.produce({ audio: true });
+            this.ttsJoined = true
         }
-        const userId = params.peerId || Math.random().toString(36).slice(2);
         await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/push/tts`, {
-            roomId: params.roomId,
-            peerId: 'node_tts_' + userId,
-            audioTransport: rtp.audioTransport,
-            audio: params.audio,
+            roomId: this.roomId,
+            peerId: this.peerId,
+            audioTransport: rtp?.audioTransport,
+            audio,
         });
-
-        return { roomId: params.roomId, peerId: userId }
     }
 
     async pushAudioStream(roomId, peerId, audio) {
