@@ -155,3 +155,10 @@ ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]trim=durati
 # 转场 
 # 需要先统一处理图片至相同的 DAR (scale=1200:600) 和 SAR (setsar=1:1)
 ffmpeg -loop 1 -t 5 -i image1.jpg -loop 1 -t 5 -i image2.jpg -loop 1 -t 5 -i image3.jpg -loop 1 -t 5 -i image4.jpg -filter_complex "[0:v]fade=t=out:st=4:d=1[v0];[1:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v1];[2:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v2];[3:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v3];[v0][v1][v2][v3]concat=n=4:v=1:a=0,format=yuv420p[v]" -map "[v]" -y out.mp4
+
+# 音量检测, 其中的 I (Integrated loudness) 可以代表音量高低
+# http://underpop.online.fr/f/ffmpeg/help/ebur128.htm.gz
+# https://tech.ebu.ch/docs/r/r128s1.pdf
+ffmpeg -i /opt/dev/rtcSdk/files/16k-2.mp3 -filter:a ebur128 audioLevel_output.mp3
+# 显示音量检测结果
+ffplay -f lavfi -i "amovie=mv1.mp4,ebur128=video=1:meter=18 [out0][out1]"
