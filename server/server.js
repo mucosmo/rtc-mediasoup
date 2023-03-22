@@ -208,6 +208,7 @@ async function runAsrSocketServer() {
 
 		ws.on('close', function () {
 			// 关闭 gst 进程
+			// FIXME: 客户端切换拉取音频但没有关闭时，会导致 gst 进程一直存在
 			const pid = clients.get(ws);
 			delete clients[ws];
 			if(pid){
@@ -228,6 +229,9 @@ function pullAudio(roomId, peerId, ws) {
 	try {
 		const audioRtpParams = global.streamInfo[roomId][peerId]['audio'];
 		const consumers = global.streamInfo[roomId][peerId]['consumers'];
+
+
+		console.log(audioRtpParams)
 
 		const gst = new GStreamer({ audio: audioRtpParams }, ws, roomId + '_' + peerId);
 

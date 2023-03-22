@@ -133,7 +133,7 @@ class RtcServer {
 
         if (rtp.audioTransport) {
             const audio = getAudioCommand(rtp);
-            pid = FfmpegCommand.execCommand(audio, sessionId);
+            pid = FfmpegCommand.execCommand(audio, sessionId, { mediaType: 'audio', peerId: params.peerId, roomId: params.roomId });
             global.processObj[sessionId]['pid'].push(pid);
         }
     }
@@ -158,7 +158,7 @@ class RtcServer {
             rtp.url = udpAddr;
             const command = getAudioCommand(rtp);
             rtp.command = command;
-            await this.execCommand(rtp);
+            await this.execCommand(rtp, { mediaType: 'audio', peerId, roomId });
         }
 
         const command = `ffmpeg -re -i ${path} -f mpegts ${udpAddr}`;
@@ -174,13 +174,13 @@ class RtcServer {
     }
 
     // execute ffmpeg command directly
-    async execCommand(params) {
+    async execCommand(params, mediaType = 'video') {
         const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
         if (!global.processObj[sessionId]) {
             global.processObj[sessionId] = { roomId: params.roomId, broadcasterId: params.peerId };
         }
         global.processObj[sessionId]['pid'] = [];
-        const pid = FfmpegCommand.execCommand(params.command, sessionId);
+        const pid = FfmpegCommand.execCommand(params.command, sessionId, mediaType);
         global.processObj[sessionId]['pid'].push(pid);
         return global.processObj;
     }
@@ -194,15 +194,6 @@ class RtcServer {
         const command = `ffmpeg -re -i ${path} -f mpegts ${audioUdp}`;
         params.command = command;
         this.execCommand(params);
-    }
-
-
-    // inform the acitve speaker to the client
-    activeSpeaker(data) {
-        const ws = global.wsActiveSpeaker;
-        if (ws) {
-            ws.send(JSON.stringify(data))
-        }
     }
 
 }
@@ -223,7 +214,7 @@ function getAudioCommand(rtp) {
     const input = `ffmpeg -re -i ${rtp.url}`;
     const audioSink = [
         `-map "0:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
-        `-f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port}`
+        `-filter:a ebur128 -f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port} `
     ].join(' ');
     const command = `${input}  ${audioSink}`;
     return command;

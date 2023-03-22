@@ -16,7 +16,9 @@ const { AssetsService } = require('../service/assets');
 const assetsService = new AssetsService();
 
 const { RtcServer } = require('../service/rtcServer');
-const rtcServer = new RtcServer({});
+
+const { activeSpeaker } = require('../service/vad');
+
 
 /**
  * Room class.
@@ -777,9 +779,10 @@ class Room extends EventEmitter {
 			for (const peer of this._getJoinedPeers()) {
 				const activeSpeakerInfo = {
 					peerId: producer.appData.peerId,
+					roomId: producer.appData.roomId,
 					volume: volume
 				}
-				rtcServer.activeSpeaker(activeSpeakerInfo);
+				activeSpeaker(activeSpeakerInfo);
 				peer.notify(
 					'activeSpeaker',
 					activeSpeakerInfo)
@@ -1035,7 +1038,7 @@ class Room extends EventEmitter {
 
 					// Add peerId into appData to later get the associated Peer during
 					// the 'loudest' event of the audioLevelObserver.
-					appData = { ...appData, peerId: peer.id };
+					appData = { ...appData, peerId: peer.id, roomId: peer.data.roomId };
 
 					const producer = await transport.produce(
 						{
