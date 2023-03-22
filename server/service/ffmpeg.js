@@ -15,8 +15,8 @@ class FfmpegCommand {
             console.log('==execCommand --err:' + data)
         })
         cp.once('close', () => {
-            // const streamSession = new StreamSession({ sessionId });
-            // streamSession.close();
+            const streamSession = new StreamSession({ sessionId });
+            streamSession.close();
         });
 
         return cp.pid;

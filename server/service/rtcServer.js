@@ -152,7 +152,8 @@ class RtcServer {
         let udpAddr = TTSUDP.get(key);
 
         if (!udpAddr) {
-            udpAddr = `udp://0.0.0.0:${Math.floor(Math.random() * 10000)}`;
+            // FIXME: 端口有冲突风险
+            udpAddr = `udp://0.0.0.0:${10000 + Math.floor(Math.random() * 10000)}`;
             TTSUDP.set(key, udpAddr);
             rtp.url = udpAddr;
             const command = getAudioCommand(rtp);
@@ -162,6 +163,7 @@ class RtcServer {
 
         const command = `ffmpeg -re -i ${path} -f mpegts ${udpAddr}`;
         params.command = command;
+        params.peerId = '_udp' + params.peerId; // 避免 udp 写进程关闭时关闭读进程
         this.execCommand(params);
     }
 
