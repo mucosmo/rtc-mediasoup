@@ -16,6 +16,7 @@ const { AssetsService } = require('../service/assets');
 const assetsService = new AssetsService();
 
 const { RtcServer } = require('../service/rtcServer');
+const rtcServer = new RtcServer({});
 
 /**
  * Room class.
@@ -50,8 +51,8 @@ class Room extends EventEmitter {
 		const audioLevelObserver = await mediasoupRouter.createAudioLevelObserver(
 			{
 				maxEntries: 1,
-				threshold: -80,
-				interval: 800
+				threshold: -60,
+				interval: 200
 			});
 
 		const bot = await Bot.create({ mediasoupRouter });
@@ -774,12 +775,14 @@ class Room extends EventEmitter {
 
 			// Notify all Peers.
 			for (const peer of this._getJoinedPeers()) {
+				const activeSpeakerInfo = {
+					peerId: producer.appData.peerId,
+					volume: volume
+				}
+				rtcServer.activeSpeaker(activeSpeakerInfo);
 				peer.notify(
 					'activeSpeaker',
-					{
-						peerId: producer.appData.peerId,
-						volume: volume
-					})
+					activeSpeakerInfo)
 					.catch(() => { });
 			}
 		});

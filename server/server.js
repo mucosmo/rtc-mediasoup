@@ -48,8 +48,7 @@ global.rooms = rooms;
 
 const GStreamer = require('./service/gst/extractAudio');
 
-const { FfmpegCommand } = require('./service/ffmpeg');
-
+global.wsActiveSpeaker = null;
 
 // HTTPS server.
 // @type {https.Server}
@@ -198,18 +197,22 @@ async function runAsrSocketServer() {
 		ws.on('message', function (data, isBinary) {
 			const message = isBinary ? data : data.toString();
 			const msg = JSON.parse(message);
-			if (msg.action == 'asr') {
+			if (msg.action === 'asr') {
 				const { roomId, peerId } = msg;
 				const process = pullAudio(roomId, peerId, ws);
 				clients.set(ws, process.pid);
+			}else if(msg.action === 'vad' ){
+				global.wsActiveSpeaker = ws;
 			}
 		});
 
 		ws.on('close', function () {
 			// 关闭 gst 进程
 			const pid = clients.get(ws);
-			kill(pid);
 			delete clients[ws];
+			if(pid){
+				kill(pid);
+			}
 		});
 	});
 

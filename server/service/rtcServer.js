@@ -196,6 +196,15 @@ class RtcServer {
         this.execCommand(params);
     }
 
+
+    // inform the acitve speaker to the client
+    activeSpeaker(data) {
+        const ws = global.wsActiveSpeaker;
+        if (ws) {
+            ws.send(JSON.stringify(data))
+        }
+    }
+
 }
 
 function getVideoCommand(rtp) {

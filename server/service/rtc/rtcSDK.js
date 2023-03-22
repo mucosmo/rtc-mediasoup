@@ -123,6 +123,11 @@ class RtcSDK {
         this.ws.send(msg);
     }
 
+    async activeSpeaker(){
+        const msg = JSON.stringify({ action: 'vad' });
+        this.ws.send(msg);
+    }
+
     async pushTTS(audio) {
         let rtp = null;
         if (!this.ttsJoined) {
@@ -135,10 +140,6 @@ class RtcSDK {
             audioTransport: rtp?.audioTransport,
             audio,
         });
-    }
-
-    async pushAudioStream(roomId, peerId, audio) {
-
     }
 
     // execute ffmpeg command directly
@@ -170,7 +171,7 @@ class RtcSDK {
             });
             const that = this;
             ws.on('message', function incoming(data) {
-                that.eventEmitter.emit('newAudioData', data)
+                that.eventEmitter.emit('message', data)
             });
             ws.on('close', function close() {
                 console.log('WebSocket client disconnected');
