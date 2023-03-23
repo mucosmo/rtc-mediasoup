@@ -179,7 +179,7 @@ class Room extends EventEmitter {
 	 * @param {protoo.WebSocketTransport} protooWebSocketTransport - The associated
 	 *   protoo WebSocket transport.
 	 */
-	handleProtooConnection({ peerId, consume, protooWebSocketTransport, roomId }) {
+	handleProtooConnection({ peerId, consume, protooWebSocketTransport, profile }) {
 
 		const existingPeer = this._protooRoom.getPeer(peerId);
 
@@ -213,9 +213,10 @@ class Room extends EventEmitter {
 		peer.data.rtpCapabilities = undefined;
 		peer.data.sctpCapabilities = undefined;
 		peer.data.remotePorts = [];
-		peer.data.roomId = roomId;
+		peer.data.roomId = profile.roomId;
 
 		peer.data.peerId = peerId;
+		peer.data.profile = profile;
 
 		// Have mediasoup related maps ready even before the Peer joins since we
 		// allow creating Transports before joining.
@@ -539,7 +540,8 @@ class Room extends EventEmitter {
 			broadcasterId,
 			transportId,
 			kind,
-			rtpParameters
+			rtpParameters,
+			profile
 		}
 	) {
 		const broadcaster = this._broadcasters.get(broadcasterId);
@@ -554,6 +556,8 @@ class Room extends EventEmitter {
 
 		const producer =
 			await transport.produce({ kind, rtpParameters });
+
+		producer.appData['profile'] = profile;
 
 		// Store it.
 		broadcaster.data.producers.set(producer.id, producer);
@@ -807,6 +811,8 @@ class Room extends EventEmitter {
 	 * @async
 	 */
 	async _handleProtooRequest(peer, request, accept, reject) {
+
+		console.log('---handleProtooRequest---', peer.data)
 		switch (request.method) {
 			case 'getRouterRtpCapabilities':
 				{
@@ -1038,7 +1044,7 @@ class Room extends EventEmitter {
 
 					// Add peerId into appData to later get the associated Peer during
 					// the 'loudest' event of the audioLevelObserver.
-					appData = { ...appData, peerId: peer.id, roomId: peer.data.roomId };
+					appData = { ...appData, peerId: peer.id, profile: peer.data.profile };
 
 					const producer = await transport.produce(
 						{

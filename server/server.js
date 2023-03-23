@@ -201,7 +201,7 @@ async function runAsrSocketServer() {
 				const { roomId, peerId } = msg;
 				const process = pullAudio(roomId, peerId, ws);
 				clients.set(ws, process.pid);
-			}else if(msg.action === 'vad' ){
+			} else if (msg.action === 'vad') {
 				global.wsActiveSpeaker = ws;
 			}
 		});
@@ -211,7 +211,7 @@ async function runAsrSocketServer() {
 			// FIXME: 客户端切换拉取音频但没有关闭时，会导致 gst 进程一直存在
 			const pid = clients.get(ws);
 			delete clients[ws];
-			if(pid){
+			if (pid) {
 				kill(pid);
 			}
 		});
@@ -268,6 +268,7 @@ async function runProtooWebSocketServer() {
 		const u = url.parse(info.request.url, true);
 		const roomId = u.query['roomId'];
 		const peerId = u.query['peerId'];
+		const language = u.query['language'] || 'zh'; // zh, en, jp
 
 		if (!roomId || !peerId) {
 			reject(400, 'Connection request without roomId and/or peerId');
@@ -295,7 +296,7 @@ async function runProtooWebSocketServer() {
 			// Accept the protoo WebSocket connection.
 			const protooWebSocketTransport = accept();
 
-			room.handleProtooConnection({ peerId, protooWebSocketTransport, roomId });
+			room.handleProtooConnection({ peerId, protooWebSocketTransport, profile: { roomId, language, peerId } });
 		})
 			.catch((error) => {
 				logger.error('room creation or room joining failed:%o', error);
