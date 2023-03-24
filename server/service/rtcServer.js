@@ -31,6 +31,7 @@ class RtcServer {
         try {
             await request.post(`rooms/${roomId}/broadcasters`, {
                 id: peerId,
+                roomId,
                 displayName: displayName,
                 device: { 'name': deviceName }
             });
@@ -39,7 +40,7 @@ class RtcServer {
         }
 
         if (params.audio) {
-            this.audioTransport = await this.produceAudio(roomId, peerId,  target);
+            this.audioTransport = await this.produceAudio(roomId, peerId, target);
         }
 
         if (params.video) {
@@ -196,6 +197,14 @@ class RtcServer {
         const command = `ffmpeg -re -i ${path} -f mpegts ${audioUdp}`;
         params.command = command;
         this.execCommand(params);
+    }
+
+    // dynamic information related with room changes
+    static roomStatus(data) {
+        const ws = global.wsRoomStatus;
+        if (ws) {
+            ws.send(JSON.stringify({ name: 'roomStatus', data }))
+        }
     }
 
 }

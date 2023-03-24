@@ -49,6 +49,7 @@ global.rooms = rooms;
 const GStreamer = require('./service/gst/extractAudio');
 
 global.wsActiveSpeaker = null;
+global.wsRoomStatus = null;
 
 // HTTPS server.
 // @type {https.Server}
@@ -203,6 +204,8 @@ async function runAsrSocketServer() {
 				clients.set(ws, process.pid);
 			} else if (msg.action === 'vad') {
 				global.wsActiveSpeaker = ws;
+			} else if (msg.action === 'roomStatus') {
+				global.wsRoomStatus = ws;
 			}
 		});
 

@@ -183,8 +183,6 @@ class Room extends EventEmitter {
 
 		const existingPeer = this._protooRoom.getPeer(peerId);
 
-		assetsService.updatePeers();
-
 		if (existingPeer) {
 			logger.warn(
 				'handleProtooConnection() | there is already a protoo Peer with same peerId, closing it [peerId:%s]',
@@ -231,8 +229,6 @@ class Room extends EventEmitter {
 				'protoo Peer "request" event [method:%s, peerId:%s]',
 				request.method, peer.id);
 
-			assetsService.updatePeers();
-
 			this._handleProtooRequest(peer, request, accept, reject)
 				.catch((error) => {
 					logger.error('request failed:%o', error);
@@ -273,7 +269,7 @@ class Room extends EventEmitter {
 				this.close();
 			}
 
-			assetsService.updatePeers();
+			assetsService.updatePeers({ peerId: peer.id, roomId: peer.data.roomId, method: 'close' });
 
 		});
 	}
@@ -292,7 +288,7 @@ class Room extends EventEmitter {
 	 * @type {Object} [device] - Additional info with name, version and flags fields.
 	 * @type {RTCRtpCapabilities} [rtpCapabilities] - Device RTP capabilities.
 	 */
-	async createBroadcaster({ id, displayName, device = {}, rtpCapabilities }) {
+	async createBroadcaster({ id, roomId, displayName, device = {}, rtpCapabilities }) {
 		if (typeof id !== 'string' || !id)
 			throw new TypeError('missing body.id');
 		else if (typeof displayName !== 'string' || !displayName)
@@ -304,6 +300,8 @@ class Room extends EventEmitter {
 
 		if (this._broadcasters.has(id))
 			throw new Error(`broadcaster with id "${id}" already exists`);
+
+		assetsService.updatePeers({ peerId: id, roomId, method: 'join' });
 
 		const broadcaster =
 		{
@@ -865,7 +863,7 @@ class Room extends EventEmitter {
 					// Mark the new Peer as joined.
 					peer.data.joined = true;
 
-					assetsService.updatePeers();
+					assetsService.updatePeers({ peerId: peer.data.peerId, roomId: peer.data.roomId, method: 'join' });
 
 					for (const joinedPeer of joinedPeers) {
 						// Create Consumers for existing Producers.

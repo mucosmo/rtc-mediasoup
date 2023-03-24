@@ -1,5 +1,6 @@
 const { LicodeService } = require('./licode');
 const licodeService = new LicodeService();
+const { RtcServer } = require('./rtcServer');
 
 class AssetsService {
     constructor() {
@@ -8,7 +9,8 @@ class AssetsService {
         this.assets = assets;
     }
 
-    updatePeers() {
+    updatePeers(data) {
+        RtcServer.roomStatus(data);
         let rtcs = []
         for (const theRoom of global.rooms.values()) {
             const roomId = theRoom._roomId;

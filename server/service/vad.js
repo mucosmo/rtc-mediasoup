@@ -4,7 +4,7 @@
 function activeSpeaker(data) {
     const ws = global.wsActiveSpeaker;
     if (ws) {
-        ws.send(JSON.stringify(data))
+        ws.send(JSON.stringify({ name: 'activeSpeaker', data }))
     }
 }
 

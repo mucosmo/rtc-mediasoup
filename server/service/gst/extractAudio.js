@@ -58,9 +58,7 @@ module.exports = class GStreamer {
     );
 
     this._process.stdout.on('data', data => {
-      // global.asrUtil.write(buf);
-      // console.log( data.toString())
-      this.ws.send(data);
+      this.ws.send(JSON.stringify({ data, name: 'newAudioData' }));
     }
     );
 

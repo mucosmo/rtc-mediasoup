@@ -82,12 +82,14 @@ async function createExpressApp() {
                 id,
                 displayName,
                 device,
+                roomId,
             } = req.body;
             const rtpCapabilities = req.room.getRouterRtpCapabilities();
             try {
                 const data = await req.room.createBroadcaster(
                     {
                         id,
+                        roomId,
                         displayName,
                         device,
                         rtpCapabilities

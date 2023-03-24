@@ -130,6 +130,12 @@ class RtcSDK {
         this.ws.send(msg);
     }
 
+    // 房间动态信息
+    async roomStatus() {
+        const msg = JSON.stringify({ action: 'roomStatus' });
+        this.ws.send(msg);
+    }
+
     async pushTTS(audio) {
         let rtp = null;
         if (!this.ttsJoined) {
@@ -172,9 +178,10 @@ class RtcSDK {
                 resolve(ws);
             });
             const that = this;
-            ws.on('message', function incoming(data) {
-                that.eventEmitter.emit('message', data)
-            });
+            ws.onmessage = function (event) {
+                const eventData = JSON.parse(event.data);
+                that.eventEmitter.emit(eventData.name, eventData.data);
+            };
             ws.on('close', function close() {
                 console.log('WebSocket client disconnected');
             });
