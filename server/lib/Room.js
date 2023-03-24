@@ -577,8 +577,10 @@ class Room extends EventEmitter {
 
 		// Optimization: Create a server-side Consumer for each Peer.
 		for (const peer of this._getJoinedPeers()) {
-			const shouldCreate = this._createConsumerPolicy(peer, target);
-			if (!shouldCreate) continue;
+			if (producer.king === 'audio') {
+				const shouldCreate = this._createConsumerPolicy(peer, target);
+				if (!shouldCreate) continue;
+			}
 			this._createConsumer(
 				{
 					consumerPeer: peer,
@@ -870,11 +872,12 @@ class Room extends EventEmitter {
 					for (const joinedPeer of joinedPeers) {
 						// Create Consumers for existing Producers.
 						for (const producer of joinedPeer.data.producers.values()) {
-							console.log('--existing producer')
-							if (producer.appData.target) {
-								if (!this._createConsumerPolicy(peer, producer.appData.target)) continue;
-							} else {
-								if (!this._createBrowserConsumerPolicy(peer.data, producer.appData)) continue;
+							if (producer.kind === 'audio') {
+								if (producer.appData.target) {
+									if (!this._createConsumerPolicy(peer, producer.appData.target)) continue;
+								} else {
+									if (!this._createBrowserConsumerPolicy(peer.data, producer.appData)) continue;
+								}
 							}
 							this._createConsumer(
 								{
@@ -1111,8 +1114,9 @@ class Room extends EventEmitter {
 
 					// Optimization: Create a server-side Consumer for each Peer.
 					for (const otherPeer of this._getJoinedPeers({ excludePeer: peer })) {
-						console.log('----new producer')
-						if (!this._createBrowserConsumerPolicy(peer.data, otherPeer.data)) continue;
+						if (producer.kind === 'audio') {
+							if (!this._createBrowserConsumerPolicy(peer.data, otherPeer.data)) continue;
+						}
 						this._createConsumer(
 							{
 								consumerPeer: otherPeer,
