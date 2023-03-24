@@ -175,7 +175,7 @@ async function createExpressApp() {
         '/rooms/:roomId/broadcasters/:broadcasterId/transports/:transportId/producers',
         async (req, res, next) => {
             const { broadcasterId, transportId } = req.params;
-            const { kind, rtpParameters,profile } = req.body;
+            const { kind, rtpParameters, target } = req.body;
 
             try {
                 const data = await req.room.createBroadcasterProducer(
@@ -184,7 +184,7 @@ async function createExpressApp() {
                         transportId,
                         kind,
                         rtpParameters,
-                        profile
+                        target
                     });
 
                 res.status(200).json(data);

@@ -179,7 +179,7 @@ class Room extends EventEmitter {
 	 * @param {protoo.WebSocketTransport} protooWebSocketTransport - The associated
 	 *   protoo WebSocket transport.
 	 */
-	handleProtooConnection({ peerId, consume, protooWebSocketTransport, profile }) {
+	handleProtooConnection({ peerId, consume, protooWebSocketTransport, roomId }) {
 
 		const existingPeer = this._protooRoom.getPeer(peerId);
 
@@ -213,10 +213,9 @@ class Room extends EventEmitter {
 		peer.data.rtpCapabilities = undefined;
 		peer.data.sctpCapabilities = undefined;
 		peer.data.remotePorts = [];
-		peer.data.roomId = profile.roomId;
+		peer.data.roomId = roomId;
 
 		peer.data.peerId = peerId;
-		peer.data.profile = profile;
 
 		// Have mediasoup related maps ready even before the Peer joins since we
 		// allow creating Transports before joining.
@@ -541,7 +540,7 @@ class Room extends EventEmitter {
 			transportId,
 			kind,
 			rtpParameters,
-			profile
+			target
 		}
 	) {
 		const broadcaster = this._broadcasters.get(broadcasterId);
@@ -557,7 +556,7 @@ class Room extends EventEmitter {
 		const producer =
 			await transport.produce({ kind, rtpParameters });
 
-		producer.appData['profile'] = profile;
+		producer.appData['target'] = target;
 
 		// Store it.
 		broadcaster.data.producers.set(producer.id, producer);
@@ -578,6 +577,8 @@ class Room extends EventEmitter {
 
 		// Optimization: Create a server-side Consumer for each Peer.
 		for (const peer of this._getJoinedPeers()) {
+			const shouldCreate = this._createConsumerPolicy(peer, target);
+			if (!shouldCreate) continue;
 			this._createConsumer(
 				{
 					consumerPeer: peer,
@@ -811,8 +812,6 @@ class Room extends EventEmitter {
 	 * @async
 	 */
 	async _handleProtooRequest(peer, request, accept, reject) {
-
-		console.log('---handleProtooRequest---', peer.data)
 		switch (request.method) {
 			case 'getRouterRtpCapabilities':
 				{
@@ -831,7 +830,8 @@ class Room extends EventEmitter {
 						displayName,
 						device,
 						rtpCapabilities,
-						sctpCapabilities
+						sctpCapabilities,
+						profile
 					} = request.data;
 
 					// Store client data into the protoo Peer data object.
@@ -840,6 +840,7 @@ class Room extends EventEmitter {
 					peer.data.device = device;
 					peer.data.rtpCapabilities = rtpCapabilities;
 					peer.data.sctpCapabilities = sctpCapabilities;
+					peer.data.profile = profile;
 
 					// Tell the new Peer about already joined Peers.
 					// And also create Consumers for existing Producers.
@@ -869,6 +870,9 @@ class Room extends EventEmitter {
 					for (const joinedPeer of joinedPeers) {
 						// Create Consumers for existing Producers.
 						for (const producer of joinedPeer.data.producers.values()) {
+							// 浏览器端所有人都能听到原声
+							// 只考虑 node 端流分发（必须有 target）
+							if (producer.appData.target && !this._createConsumerPolicy(peer, producer.appData.target)) continue;
 							this._createConsumer(
 								{
 									consumerPeer: peer,
@@ -1104,6 +1108,8 @@ class Room extends EventEmitter {
 
 					// Optimization: Create a server-side Consumer for each Peer.
 					for (const otherPeer of this._getJoinedPeers({ excludePeer: peer })) {
+						// 所有人都能听到原声，所以注释掉
+						// if (otherPeer.data.profile.language !== appData.profile.language) continue;
 						this._createConsumer(
 							{
 								consumerPeer: otherPeer,
@@ -1754,6 +1760,18 @@ class Room extends EventEmitter {
 		catch (error) {
 			logger.warn('_createDataConsumer() | failed:%o', error);
 		}
+	}
+
+	// determine if specific consumer should be created for producer
+	_createConsumerPolicy(peer, target) {
+		console.log('-------createConsumerPolicy-------')
+		console.log(peer.data.profile);
+		console.log(target)
+		if (
+			peer.data.profile.language === target.language
+			|| peer.data.profile.role === target.role
+		) return true; //只订阅同语言的
+		return false;
 	}
 }
 

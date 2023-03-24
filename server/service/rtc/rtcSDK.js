@@ -58,22 +58,21 @@ class RtcSDK {
         this.roomId = params.roomId || Math.random().toString(36).slice(2);
         this.userId = params.userId || Math.random().toString(36).slice(2);
         this.peerId = 'node_' + this.userId;
-        this.language = params.language || 'zh';
+        this.target = params.target;
         this.displayName = params.displayName || 'DH-TX';
         this.deviceName = params.deviceName || 'GStreamer';
         const wssBaseUrl = rtcConfig.RTC_SERVER_WSS_BASEURL;
-        const protooUrl = `${wssBaseUrl}/?roomId=${this.roomId}&peerId=${this.peerId}&language=${this.language}`;
+        const protooUrl = `${wssBaseUrl}/?roomId=${this.roomId}&peerId=${this.peerId}`;
         this.client = await protooConnect(protooUrl);
         this.clientKey = getClientKey(this.roomId, this.peerId);
         global.client.set(this.clientKey, this.client);
     }
 
     async produce(params) {
-        const profile = { roomId: this.roomId, peerId: this.peerId, language: this.language };
         const rtp = await request.post(`${rtcConfig.RTC_SERVER_HTTPS_BASEURL}/rtc/room/produce`, {
             roomId: this.roomId,
             peerId: this.peerId,
-            profile,
+            target: this.target,
             displayName: this.displayName,
             deviceName: this.deviceName,
             video: params.video,

@@ -268,7 +268,6 @@ async function runProtooWebSocketServer() {
 		const u = url.parse(info.request.url, true);
 		const roomId = u.query['roomId'];
 		const peerId = u.query['peerId'];
-		const language = u.query['language'] || 'zh'; // zh, en, jp
 
 		if (!roomId || !peerId) {
 			reject(400, 'Connection request without roomId and/or peerId');
@@ -296,7 +295,7 @@ async function runProtooWebSocketServer() {
 			// Accept the protoo WebSocket connection.
 			const protooWebSocketTransport = accept();
 
-			room.handleProtooConnection({ peerId, protooWebSocketTransport, profile: { roomId, language, peerId } });
+			room.handleProtooConnection({ peerId, protooWebSocketTransport, roomId });
 		})
 			.catch((error) => {
 				logger.error('room creation or room joining failed:%o', error);

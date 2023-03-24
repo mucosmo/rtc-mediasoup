@@ -25,7 +25,7 @@ class RtcServer {
 
     async produce(params) {
         this.sessionId = 'push_stream_' + uuidv4();
-        const { roomId, peerId, displayName, deviceName, profile } = params;
+        const { roomId, peerId, displayName, deviceName, target } = params;
         // 验证房间是否存在
         await request.get(`/rooms/${roomId}`);
         try {
@@ -39,11 +39,11 @@ class RtcServer {
         }
 
         if (params.audio) {
-            this.audioTransport = await this.produceAudio(roomId, peerId, profile);
+            this.audioTransport = await this.produceAudio(roomId, peerId,  target);
         }
 
         if (params.video) {
-            this.videoTransport = await this.produceVideo(roomId, peerId, profile);
+            this.videoTransport = await this.produceVideo(roomId, peerId, target);
         }
 
         const sessionId = StreamSession.getPushStreamSessionId(roomId, peerId);
@@ -56,7 +56,7 @@ class RtcServer {
         }
     }
 
-    async produceAudio(roomId, peerId, profile) {
+    async produceAudio(roomId, peerId, target) {
         // 创建 mediasoup audio plainTransport
         let res = await request.post(`rooms/${roomId}/broadcasters/${peerId}/transports`, {
             type: 'plain',
@@ -85,12 +85,12 @@ class RtcServer {
                     ssrc: AUDIO_SSRC
                 }]
             },
-            profile
+            target
         })
         return audioTransport;
     }
 
-    async produceVideo(roomId, peerId, profile) {
+    async produceVideo(roomId, peerId,  target) {
         const { VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
         // 创建 mediasoup video plainTransport
         const res = await request.post(`rooms/${roomId}/broadcasters/${peerId}/transports`, {
@@ -115,7 +115,7 @@ class RtcServer {
                     ssrc: VIDEO_SSRC
                 }]
             },
-            profile
+            target
         })
         return videoTransport;
     }
