@@ -13,7 +13,7 @@ class FfmpegCommand {
             if (params.mediaType === 'audio') {
                 const volume = parseVolume(data);
                 if (volume > -60) {
-                    activeSpeaker({ peerId: params.peerId, roomId:params.roomId, volume });
+                    activeSpeaker({ peerId: params.peerId, roomId: params.roomId, volume });
                 }
             }
         })
@@ -23,6 +23,28 @@ class FfmpegCommand {
         });
 
         return cp.pid;
+    }
+
+    static async executeTts(command, sessionId, params) {
+        return new Promise((resolve, reject) => {
+            const cp = exec(command);
+            const pid = cp.pid;
+            global.processObj[sessionId]['pid'].push(pid);
+            cp.stderr.on('data', data => {
+                if (params.mediaType === 'audio') {
+                    const volume = parseVolume(data);
+                    if (volume > -60) {
+                        activeSpeaker({ peerId: params.peerId, roomId: params.roomId, volume });
+                    }
+                }
+            })
+            cp.once('close', () => {
+                const streamSession = new StreamSession({ sessionId });
+                streamSession.close();
+                resolve(pid);
+            });
+        })
+
     }
 }
 

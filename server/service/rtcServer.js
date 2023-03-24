@@ -13,6 +13,9 @@ const audioUdp = `udp://0.0.0.0:${Math.floor(Math.random() * 10000)}`;
 
 const TTSUDP = new Map();
 
+const { AwaitQueue } = require('awaitqueue');
+const queue = new AwaitQueue();
+
 class RtcServer {
     constructor(params) {
         this.rtpParameters = {
@@ -91,7 +94,7 @@ class RtcServer {
         return audioTransport;
     }
 
-    async produceVideo(roomId, peerId,  target) {
+    async produceVideo(roomId, peerId, target) {
         const { VIDEO_PT, VIDEO_SSRC } = this.rtpParameters;
         // 创建 mediasoup video plainTransport
         const res = await request.post(`rooms/${roomId}/broadcasters/${peerId}/transports`, {
@@ -145,7 +148,7 @@ class RtcServer {
         const fs = require('fs');
         const { roomId, peerId, audio } = params;
         const buffer = Buffer.from(audio, 'base64');
-        const path = `/opt/dev/rtcSdk/files/tts/tts_${roomId}_${peerId}.wav`;
+        const path = `/opt/dev/rtcSdk/files/tts/tts_${roomId}_${peerId}_${Math.random()}.wav`;
         fs.writeFileSync(path, buffer);
 
         const rtp = params;
@@ -167,7 +170,9 @@ class RtcServer {
         const command = `ffmpeg -re -i ${path} -f mpegts ${udpAddr}`;
         params.command = command;
         params.peerId = '_udp' + params.peerId; // 避免 udp 写进程关闭时关闭读进程
-        this.execCommand(params);
+        queue.push(async () => {
+            await this.executeTts(params);
+        })
     }
 
     static leaveRoom(params) {
@@ -186,6 +191,15 @@ class RtcServer {
         const pid = FfmpegCommand.execCommand(params.command, sessionId, mediaType);
         global.processObj[sessionId]['pid'].push(pid);
         return global.processObj;
+    }
+
+    async executeTts(params, mediaType = 'video') {
+        const sessionId = StreamSession.getPushStreamSessionId(params.roomId, params.peerId);
+        if (!global.processObj[sessionId]) {
+            global.processObj[sessionId] = { roomId: params.roomId, broadcasterId: params.peerId };
+        }
+        global.processObj[sessionId]['pid'] = [];
+        await FfmpegCommand.executeTts(params.command, sessionId, mediaType);
     }
 
     pushAudio(params) {

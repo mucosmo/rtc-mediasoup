@@ -43,15 +43,14 @@ class StreamSession {
 async function deleteDh(sessionId) {
     try {
         const { roomId, pid, broadcasterId } = global.processObj[sessionId];
-        if (roomId && broadcasterId) {
-            await request.delete(`/rooms/${roomId}/broadcasters/${broadcasterId}`);
-        }
-        
         pid.map(p => {
             kill(p);
         })
         delete global.processObj[sessionId];
-        return { broadcasterId, pid, sessionId }
+        if (roomId && broadcasterId) {
+            await request.delete(`/rooms/${roomId}/broadcasters/${broadcasterId}`);
+        }
+        return { broadcasterId, pid, sessionId };
     } catch (err) {
         return err.message;
     }
