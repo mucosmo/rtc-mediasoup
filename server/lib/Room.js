@@ -19,6 +19,8 @@ const { RtcServer } = require('../service/rtcServer');
 
 const { activeSpeaker } = require('../service/vad');
 
+const lodash = require('lodash');
+
 
 /**
  * Room class.
@@ -868,9 +870,12 @@ class Room extends EventEmitter {
 					for (const joinedPeer of joinedPeers) {
 						// Create Consumers for existing Producers.
 						for (const producer of joinedPeer.data.producers.values()) {
-							// 浏览器端所有人都能听到原声
-							// 只考虑 node 端流分发（必须有 target）
-							if (producer.appData.target && !this._createConsumerPolicy(peer, producer.appData.target)) continue;
+							console.log('--existing producer')
+							if (producer.appData.target) {
+								if (!this._createConsumerPolicy(peer, producer.appData.target)) continue;
+							} else {
+								if (!this._createBrowserConsumerPolicy(peer.data, producer.appData)) continue;
+							}
 							this._createConsumer(
 								{
 									consumerPeer: peer,
@@ -1106,8 +1111,8 @@ class Room extends EventEmitter {
 
 					// Optimization: Create a server-side Consumer for each Peer.
 					for (const otherPeer of this._getJoinedPeers({ excludePeer: peer })) {
-						// 所有人都能听到原声，所以注释掉
-						// if (otherPeer.data.profile.language !== appData.profile.language) continue;
+						console.log('----new producer')
+						if (!this._createBrowserConsumerPolicy(peer.data, otherPeer.data)) continue;
 						this._createConsumer(
 							{
 								consumerPeer: otherPeer,
@@ -1763,12 +1768,20 @@ class Room extends EventEmitter {
 	// determine if specific consumer should be created for producer
 	_createConsumerPolicy(peer, target) {
 		console.log('-------createConsumerPolicy-------')
-		console.log(peer.data.profile);
-		console.log(target)
+		console.log(peer.data.profile, target);
 		if (
-			peer.data.profile.language === target.language
+			lodash.intersection(peer.data.profile.lanListen, target.lanListen).length > 0
 			|| peer.data.profile.role === target.role
 		) return true; //只订阅同语言的
+		return false;
+	}
+
+	// determine if specific consumer should be created for producer
+	_createBrowserConsumerPolicy(peerData, otherPeerData) {
+		console.log('-------createBrowserConsumerPolicy-------')
+		console.log(peerData.profile.lanListen, otherPeerData.profile.lanSpeak)
+		const lanCommon = lodash.intersection(peerData.profile.lanListen, otherPeerData.profile.lanSpeak);
+		if (lanCommon.length > 0) return true;
 		return false;
 	}
 }
