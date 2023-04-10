@@ -577,7 +577,7 @@ class Room extends EventEmitter {
 
 		// Optimization: Create a server-side Consumer for each Peer.
 		for (const peer of this._getJoinedPeers()) {
-			if (producer.king === 'audio') {
+			if (producer.kind === 'audio') {
 				const shouldCreate = this._createConsumerPolicy(peer, target);
 				if (!shouldCreate) continue;
 			}
@@ -1770,6 +1770,7 @@ class Room extends EventEmitter {
 	}
 
 	// determine if specific consumer should be created for producer
+	// for node peer
 	_createConsumerPolicy(peer, target) {
 		console.log('-------createConsumerPolicy-------')
 		console.log(peer.data.profile, target);
@@ -1781,6 +1782,7 @@ class Room extends EventEmitter {
 	}
 
 	// determine if specific consumer should be created for producer
+	// for browser peer
 	_createBrowserConsumerPolicy(peerData, otherPeerData) {
 		console.log('-------createBrowserConsumerPolicy-------')
 		console.log(peerData.profile.lanListen, otherPeerData.profile.lanSpeak)
