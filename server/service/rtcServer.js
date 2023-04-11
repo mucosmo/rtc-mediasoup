@@ -15,6 +15,7 @@ const TTSUDP = new Map();
 
 const { AwaitQueue } = require('awaitqueue');
 const queue = new AwaitQueue();
+const tcpPortUsed = require('tcp-port-used');
 
 class RtcServer {
     constructor(params) {
@@ -158,8 +159,8 @@ class RtcServer {
         let udpAddr = TTSUDP.get(key);
 
         if (!udpAddr) {
-            // FIXME: 端口有冲突风险
-            udpAddr = `udp://0.0.0.0:${10000 + Math.floor(Math.random() * 10000)}`;
+            const port = await getAvailablePort();
+            udpAddr = `udp://0.0.0.0:${port}`;
             TTSUDP.set(key, udpAddr);
             rtp.url = udpAddr;
             const command = getAudioCommand(rtp);
@@ -245,6 +246,14 @@ function getAudioCommand(rtp) {
     return command;
 }
 
+// check if a port is available and return one free
+async function getAvailablePort() {
+    let port = 10000 + Math.floor(Math.random() * 10000);
+    while (await tcpPortUsed.check(port)) {
+        port = 10000 + Math.floor(Math.random() * 10000);
+    }
+    return port;
+}
 
 
 
