@@ -237,8 +237,9 @@ function getVideoCommand(rtp) {
 }
 
 function getAudioCommand(rtp) {
-    // http://downsc.chinaz.net/Files/DownLoad/sound1/201906/11582.mp3
-    const input = `ffmpeg -re -i ${rtp.url}`;
+    // -probesize  solve startup latency introduced by 'initial input streams analysis'
+    // (How to minimize the delay in a live streaming with ffmpeg)[https://stackoverflow.com/questions/16658873/how-to-minimize-the-delay-in-a-live-streaming-with-ffmpeg]
+    const input = `ffmpeg -re -probesize 1000 -i ${rtp.url}`;
     const audioSink = [
         `-map "0:a" -c:a libopus -ac 1 -ssrc ${rtp.rtpParameters.AUDIO_SSRC} -payload_type ${rtp.rtpParameters.AUDIO_PT}`,
         `-filter:a ebur128 -f rtp rtp://${rtp.audioTransport.ip}:${rtp.audioTransport.port} `
