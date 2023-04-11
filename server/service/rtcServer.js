@@ -173,6 +173,7 @@ class RtcServer {
         params.peerId = '_udp' + params.peerId; // 避免 udp 写进程关闭时关闭读进程
         queue.push(async () => {
             await this.executeTts(params);
+            fs.unlinkSync(path);
         })
     }
 
