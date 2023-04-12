@@ -57,7 +57,8 @@ class RtcServer {
         return {
             audioTransport: this.audioTransport,
             videoTransport: this.videoTransport,
-            rtpParameters: this.rtpParameters
+            rtpParameters: this.rtpParameters,
+            sessionId
         }
     }
 

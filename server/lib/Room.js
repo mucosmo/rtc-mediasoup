@@ -1774,6 +1774,7 @@ class Room extends EventEmitter {
 	_createConsumerPolicy(peer, target) {
 		console.log('-------createConsumerPolicy-------')
 		console.log(peer.data.profile, target);
+		if(!target) return true;
 		if (
 			lodash.intersection(peer.data.profile.lanListen, target.lanListen).length > 0
 			|| peer.data.profile.role === target.role

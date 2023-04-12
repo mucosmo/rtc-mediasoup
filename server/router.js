@@ -443,13 +443,11 @@ async function createExpressApp() {
             let rtc = null;
             try {
                 const data = req.body;
-                const rtc = new RtcSDK({});
-                await rtc.createRoom(data);
-                await rtc.joinRoom(data)
-                res.status(200).json(rtc);
+                const ret = await rtcServer.produce(data);
+                res.status(200).json(ret);
             }
             catch (error) {
-                await rtc.close();
+                console.error(error)
                 next(error);
             }
         });
@@ -528,33 +526,33 @@ async function createExpressApp() {
             }
         });
 
-        expressApp.post(
-            '/rtc/room/push/tts',
-            async (req, res, next) => {
-                try {
-                    const data = req.body;
-                    const ret = await rtcServer.pushTTS(data);
-                    res.status(200).json(ret);
-                }
-                catch (error) {
-                    console.error(error)
-                    next(error);
-                }
-            });
+    expressApp.post(
+        '/rtc/room/push/tts',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const ret = await rtcServer.pushTTS(data);
+                res.status(200).json(ret);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
 
-        expressApp.post(
-            '/rtc/room/audio/push',
-            async (req, res, next) => {
-                try {
-                    const data = req.body;
-                    const ret = await rtcServer.pushAudio(data);
-                    res.status(200).json(ret);
-                }
-                catch (error) {
-                    console.error(error)
-                    next(error);
-                }
-            });
+    expressApp.post(
+        '/rtc/room/audio/push',
+        async (req, res, next) => {
+            try {
+                const data = req.body;
+                const ret = await rtcServer.pushAudio(data);
+                res.status(200).json(ret);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
 
 
     expressApp.post(
