@@ -185,3 +185,13 @@ ffmpeg -i /opt/application/tx-rtcStream/files/resources/office10s.mp4 -i /opt/ap
 
 # geq filter 可能有用
 ffmpeg -i /opt/application/tx-rtcStream/files/resources/office10s.mp4 -i /opt/application/tx-rtcStream/files/resources/dh.mp4 -i /opt/application/tx-rtcStream/files/resources/mask.png -filter_complex "[1:v]format=rgba,colorkey=0x00FF00:0.1:0.2,geq=lum_expr='r=128:g=128:b=128':128,maskfun='r(X,Y)':128:128[masked];[masked][2:v]alphamerge[overlay];[0:v][overlay]overlay=0:0[outv]" -map "[outv]" -y output.mp4
+
+
+# 最后结果中忽略前面的帧
+ffmpeg -i /opt/dev/rtcSdk/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/dh.mp4 -filter_complex "[0:v]overlay=200:200[merged];[merged]trim=start_frame=100,setpts=PTS-STARTPTS[out]" -map "[out]" -y skip.mp4
+
+ffmpeg -i /opt/dev/rtcSdk/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/dh.mp4 -filter_complex "[0:v]overlay=200:200,trim=start_frame=100,setpts=PTS-STARTPTS[out]" -map "[out]" -y skip.mp4
+
+
+# 生成测试用的时钟视频(需要注意format=yuv420p)
+ffmpeg -f lavfi -i "testsrc=duration=100:size=320x240:rate=30,format=yuv420p" -c:v libx264 -preset medium -t 100 -y 100_input.mp4

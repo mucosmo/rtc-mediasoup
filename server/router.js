@@ -569,6 +569,20 @@ async function createExpressApp() {
             }
         });
 
+    // current stats of ffmpeg command executed
+    expressApp.get(
+        '/rtc/room/command/stats',
+        async (req, res, next) => {
+            try {
+                const ret = { currentFrame: global.currentFrame }
+                res.status(200).json(ret);
+            }
+            catch (error) {
+                console.error(error)
+                next(error);
+            }
+        });
+
     expressApp.post(
         '/rtc/room/leave',
         async (req, res, next) => {
