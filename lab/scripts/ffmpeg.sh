@@ -195,3 +195,6 @@ ffmpeg -i /opt/dev/rtcSdk/files/resources/20_input.mp4 -i /opt/application/tx-rt
 
 # 生成测试用的时钟视频(需要注意format=yuv420p)
 ffmpeg -f lavfi -i "testsrc=duration=100:size=320x240:rate=30,format=yuv420p" -c:v libx264 -preset medium -t 100 -y 100_input.mp4
+
+# 片段裁剪 (-ss hh:mm:ss[.xxx] 位数代表精度， 00:00:05.80 / 00:00:05.800 / 5.80 是一样的)
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/100_input.mp4 -ss 70.10 -t 3.60 -y clock_clip.mp4
