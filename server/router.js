@@ -574,8 +574,7 @@ async function createExpressApp() {
         '/rtc/room/command/stats',
         async (req, res, next) => {
             try {
-                const ret = { currentFrame: global.currentFrame }
-                res.status(200).json(ret);
+                res.status(200).json(global.ffmpegData);
             }
             catch (error) {
                 console.error(error)
