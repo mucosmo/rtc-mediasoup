@@ -198,3 +198,49 @@ ffmpeg -f lavfi -i "testsrc=duration=100:size=320x240:rate=30,format=yuv420p" -c
 
 # 片段裁剪 (-ss hh:mm:ss[.xxx] 位数代表精度， 00:00:05.80 / 00:00:05.800 / 5.80 是一样的)
 ffmpeg -i /opt/application/tx-rtcStream/files/resources/100_input.mp4 -ss 70.10 -t 3.60 -y clock_clip.mp4
+
+
+# 渐入叠加
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/dh.mp4 -filter_complex "[1:v]fade=in:st=4:d=2[fadein];[0:v][fadein]overlay=10:10[outv]" -map "[outv]" -c:v libx264 -preset fast -crf 18 -c:a copy -y fade_output.mp4
+
+
+# 渐入时避免黑块(trim)
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/100_input.mp4 -i /opt/application/tx-rtcStream/files/resources/dh.mp4 -filter_complex "[1:v]trim=start_frame=0,setpts=PTS-STARTPTS+4/TB,fade=in:st=0:d=2[fadein];[0:v][fadein]overlay=10:10[outv]" -map "[outv]" -c:v libx264 -preset fast -crf 18 -c:a copy output.mp4
+
+# 渐入时避免黑块（format), 注意添加alpha值到fade滤波器的参数列表中
+# format=pix_fmts=yuva420p is optional, but it will make the fade smoother
+# https://superuser.com/questions/881002/how-can-i-avoid-a-black-background-when-fading-in-an-overlay-with-ffmpeg
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/office10s.mp4 -filter_complex "[1:v]format=pix_fmts=yuva420p,fade=in:st=4:d=2:alpha=1,fade=out:st=10:d=1:alpha=1[fadein];[0:v][fadein]overlay=10:10[outv]" -map "[outv]" -c:v libx264 -preset fast -crf 18 -c:a copy -y fade_output.mp4
+
+
+ffmpeg  -ss 0 -t 30 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3  -acodec copy -y caihong.mp3
+
+# 利用 concat 拼接音频时，需注意每个音频的 st 都应当是 0 ， 否则会出现空白的时间段
+ffmpeg  -ss 10 -t 10 -i /opt/application/tx-rtcStream/files/resources/成都.mp3  -ss 13 -t 15 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[0:a]afade=t=in:st=0:d=3,afade=t=out:st=7:d=3[a6];[1:a]afade=t=in:st=0:d=1,afade=t=out:st=10.00:d=3[a7];[a6][a7]concat=n=2:v=0:a=1[a]" -map "[a]" -acodec libmp3lame -y audio_concat.mp3
+
+
+ffmpeg -ss 10 -t 20 -i /opt/application/tx-rtcStream/files/resources/成都.mp3  -ss 10 -t 11 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[0:a]afade=t=out:st=10:d=3[a1];[1:a]afade=t=in:st=11:d=3,afade=t=out:st=20:d=3,apad[a2];[a1][a2]amerge=inputs=2[aout]" -map "[aout]" -y audio_merge.mp3
+
+
+# 在音频之间插入空白音频
+ffmpeg -f lavfi -t 5 -i anullsrc=channel_layout=stereo:sample_rate=44100 -ss 10 -t 20 -i /opt/application/tx-rtcStream/files/resources/成都.mp3 -ss 10 -t 11 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3  -filter_complex "[1:a][0:a][2:a][0:a]concat=n=4:v=0:a=1" silent_concat.mp3
+
+
+# 生成空白音频
+ffmpeg -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 5 silence.mp3
+
+
+# 叠加时延迟显示某视频
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/40_input.mp4 -i /opt/application/tx-rtcStream/files/resources/40_input.mp4 -filter_complex "[1:v]setpts=PTS-STARTPTS+4/TB,scale=w='iw/3':h='ih/3'[v1];[0:v][v1]overlay=10:10" -c:a copy overlay_setpts.mp4
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/40_input.mp4  -fflags +genpts -c:v copy -an timebase.mp4
+
+ffprobe -v error -show_entries packet=pts_time,start_pts_time -of default=noprint_wrappers=1 /opt/application/tx-rtcStream/files/resources/20_input.mp4
+
+# 合并音频视频，音频延迟 4s
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/40_input.mp4  -ss 18 -t 30 -i /opt/application/tx-rtcStream/files/resources/成都.mp3 -filter_complex "[1:a]asetpts=PTS-STARTPTS+4/TB" -c:v copy -c:a libmp3lame -y asetpts.mp4
+
+ffmpeg -ss 10 -t 20 -i /opt/application/tx-rtcStream/files/resources/成都.mp3 -ss 10 -t 11 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3  -filter_complex "[1:a]asetpts=PTS-STARTPTS+24/TB[audio];[0:a][audio]concat=n=2:v=0:a=1" -y asetpts_concat.mp3
+
+# 叠加透明背景图片
+ffmpeg  -i /opt/application/tx-rtcStream/files/resources/testsrc_1280x960_30p.mp4 -i /opt/application/tx-rtcStream/files/resources/dog_couch.png -filter_complex "[1]scale=-1:800[1s];[0][1s]overlay=0:0[ret]" -map "[ret]"  -y dog.mp4

@@ -40,6 +40,7 @@ class FfmpegCommand {
         cp.once('close', () => {
             console.log('-- complete executing command --', params.peerId)
             global.ffmpegData = null;
+            global.mixerMap = new Map();
             const streamSession = new StreamSession({ sessionId });
             streamSession.close();
         });
