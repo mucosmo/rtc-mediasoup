@@ -569,12 +569,27 @@ async function createExpressApp() {
             }
         });
 
+        expressApp.post(
+            '/rtc/room/reset',
+            async (req, res, next) => {
+                try {
+                    const data = req.body;
+                    global.mixerStart.delete(data.roomId);;
+                    res.status(200).json(ret);
+                }
+                catch (error) {
+                    console.error(error)
+                    next(error);
+                }
+            });
+
     // current stats of ffmpeg command executed
-    expressApp.get(
+    expressApp.post(
         '/rtc/room/command/stats',
         async (req, res, next) => {
             try {
-                res.status(200).json(global.ffmpegData);
+                const data = { startTime: global.mixerStart.get(req.body.roomId) || 0 };
+                res.status(200).json(data);
             }
             catch (error) {
                 console.error(error)

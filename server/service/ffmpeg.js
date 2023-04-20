@@ -8,18 +8,32 @@ global.ffmpegStats = {};
 global.ffmpegData = null;
 
 global.mixerMap = new Map();
+
+global.mixerStart = new Map();
+
+global.preSession = new Map();
+
 class FfmpegCommand {
     constructor() {
         this.frameMap = new Map();
     }
 
     static execCommand(command, sessionId, params) {
+        if (params.peerId.includes('mixer')) {
+            global.mixerStart.get(params.roomId) || global.mixerStart.set(params.roomId, new Date().getTime());
+            const preSession = global.preSession.get(params.roomId);
+            if(preSession){
+                const streamSession = new StreamSession({ sessionId: preSession });
+                streamSession.close();
+            }
+            global.preSession.set(params.roomId, sessionId);
+        }
         console.log('------- params:', params)
         const cp = exec(command);
         cp.stderr.on('data', data => {
             console.log('---data', data)
             if (params.peerId.includes('mixer')) {
-                const peerId = global.mixerMap.get(params.roomId)
+                const peerId = global.mixerMap.get(params.roomId);
                 if (peerId) {
                     if (params.peerId === peerId) {
                         global.ffmpegData = data;
@@ -41,6 +55,7 @@ class FfmpegCommand {
             console.log('-- complete executing command --', params.peerId)
             global.ffmpegData = null;
             global.mixerMap = new Map();
+            // global.mixerStart.delete(params.roomId);
             const streamSession = new StreamSession({ sessionId });
             streamSession.close();
         });
