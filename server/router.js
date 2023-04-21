@@ -574,7 +574,7 @@ async function createExpressApp() {
             async (req, res, next) => {
                 try {
                     const data = req.body;
-                    global.mixerStart.delete(data.roomId);;
+                    const ret=global.mixerStart.delete(data.roomId);;
                     res.status(200).json(ret);
                 }
                 catch (error) {

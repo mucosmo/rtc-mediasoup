@@ -31,7 +31,7 @@ class FfmpegCommand {
         console.log('------- params:', params)
         const cp = exec(command);
         cp.stderr.on('data', data => {
-            console.log('---data', data)
+            // console.log('---data', data)
             if (params.peerId.includes('mixer')) {
                 const peerId = global.mixerMap.get(params.roomId);
                 if (peerId) {
