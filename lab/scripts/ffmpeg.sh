@@ -104,7 +104,7 @@ ffmpeg -i /opt/application/tx-rtcStream/files/resources/screen5s.mp4  -filter_co
 #   --extra-cflags="-I/opt/program/ffmpeg/include" \
 #   --extra-ldflags="-L/opt/program/ffmpeg/lib" \
 #   --extra-libs="-lpthread -lm" \
-#   --ld="g++"  --prefix=/opt/program/ffmpeg --enable-shared --enable-gpl --enable-version3 --enable-static --disable-debug --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --cc=gcc --enable-fontconfig  --enable-gnutls --enable-gmp --enable-gray --enable-libaom --enable-libfribidi --enable-libass --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libvpx  --enable-libx264 --enable-libx265 
+#   --ld="g++"  --prefix=/opt/program/ffmpeg --enable-shared --enable-gpl --enable-version3 --enable-static --disable-debug --disable-ffplay --disable-indev=sndio --disable-outdev=sndio --cc=gcc --enable-fontconfig  --enable-gnutls --enable-gmp --enable-gray --enable-libaom --enable-libfribidi --enable-libass --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libvpx  --enable-libx264 --enable-libx265
 
 
 # # c 程序转码时绘制文本
@@ -135,9 +135,9 @@ echo shell-execution time was `expr $end_time - $timestamp` s
 
 
 ## 左右两个视频对比
-ffmpeg -i 10_input.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]scale=640x480,setsar=1,pad=1280:480:0:0[v0];[v1]scale=640x480,setsar=1, hue=s=0,boxblur=3:1[v1];[v0][v1]overlay=w" -c:a copy -y 10_output.mp4 
+ffmpeg -i 10_input.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]scale=640x480,setsar=1,pad=1280:480:0:0[v0];[v1]scale=640x480,setsar=1, hue=s=0,boxblur=3:1[v1];[v0][v1]overlay=w" -c:a copy -y 10_output.mp4
 
-ffmpeg -i forest.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]pad=2732:720:0:0[v0];[v1]hue=s=0,boxblur=3:1[v1];[v0][v1]overlay=w" -c:a copy -y forest_splitter_output.mp4 
+ffmpeg -i forest.mp4 -filter_complex "[0:v]split=2[v0][v1];[v0]pad=2732:720:0:0[v0];[v1]hue=s=0,boxblur=3:1[v1];[v0][v1]overlay=w" -c:a copy -y forest_splitter_output.mp4
 
 ffmpeg -i forest.mp4 -i forest_output.mp4 -filter_complex "[0]pad=2732:720:0:0[v0];[v0][1]overlay=w" -c:a copy -y forest_splitter_output.mp4
 
@@ -152,7 +152,7 @@ ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]fade=in:st=
 ffmpeg -i forest.mp4 -loop 1 -i globalmap.jfif -filter_complex "[1:v]trim=duration=5,scale=640x360[v1];[0:v][v1]overlay=10:10:enable='between(t,0,5)'" -pix_fmt yuv420p -c:a copy forest_overlay_trim.mp4
 
 
-# 转场 
+# 转场
 # 需要先统一处理图片至相同的 DAR (scale=1200:600) 和 SAR (setsar=1:1)
 ffmpeg -loop 1 -t 5 -i image1.jpg -loop 1 -t 5 -i image2.jpg -loop 1 -t 5 -i image3.jpg -loop 1 -t 5 -i image4.jpg -filter_complex "[0:v]fade=t=out:st=4:d=1[v0];[1:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v1];[2:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v2];[3:v]fade=t=in:st=0:d=1,fade=t=out:st=4:d=1[v3];[v0][v1][v2][v3]concat=n=4:v=1:a=0,format=yuv420p[v]" -map "[v]" -y out.mp4
 
@@ -243,7 +243,7 @@ ffmpeg -ss 10 -t 20 -i /opt/application/tx-rtcStream/files/resources/成都.mp3 
 ffmpeg -f lavfi -t 5 -i anullsrc=channel_layout=stereo:sample_rate=44100 -ss 10 -t 20 -i /opt/application/tx-rtcStream/files/resources/成都.mp3 -ss 10 -t 11 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3  -filter_complex "[1:a][0:a][2:a][0:a]concat=n=4:v=0:a=1" silent_concat.mp3
 
 
-# 生成空白音频
+# 生成空白音频 (silence audio)
 ffmpeg -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 5 silence.mp3
 
 
@@ -301,7 +301,7 @@ ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4  -i /opt/ap
 # 128 + 100*sin(2*(PI/100)*(cos(PI/3)*(X-50*T) + sin(PI/3)*Y)):128:128
 # 光球， nullsrc 是黑色背景视频
 # random(1)/hypot(X-cos(N*0.07)*W/2-W/2\,Y-sin(N*0.09)*H/2-H/2)^2*1000000*sin(N*0.02):128:128
-# 
+#
 # (p(X,Y)+(256-p(X-4,Y-4)))/2
 ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4  -i /opt/application/tx-rtcStream/files/resources/image1.jpg -filter_complex "nullsrc=s=320x240:d=10,geq='lum=random(1)/hypot(X-cos(N*0.07)*W/2-W/2\,Y-sin(N*0.09)*H/2-H/2)^2*1000000*sin(N*0.02):128:128'[rounded_overlay];[rounded_overlay]colorkey=0x000000:0.3:0.1[av];[0:v][av]overlay=x=0:y=0:enable='between(t,1,10)':alpha=1" -c:a copy -y geq.mp4
 
@@ -359,7 +359,51 @@ ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/app
 
 
 # 黑底背景分屏加转场
-ffmpeg  -i /opt/application/tx-rtcStream/files/resources/20_input.mp4  -ss 0 -t 20 -i /opt/application/tx-rtcStream/files/resources/forest.mp4 -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/office10s.mp4 -i /opt/application/tx-rtcStream/files/resources/video2.mp4 -filter_complex "color=c=black:s=320x240:r=30:d=5[bg];[0:v]crop=iw/3:ih:2*iw/3:0[0v];[1:v]crop=iw/3:ih:2*iw/3:0[1v];[2:v]crop=2*iw/4:ih/2:iw/2:ih/3[2v];[bg][0v]overlay=0:0[ov0];[ov0][1v]overlay=W/3[ov1];[ov1][2v]overlay=W/3:H/2,settb=1/20[bg0];[3:v]scale=320:240,setsar=1:1,fps=30,settb=1/20[3v];[4:v]scale=320:240,setsar=1:1,fps=30,settb=1/20[4v];[bg0][3v]xfade=transition=circleclose:duration=2:offset=13[bg1];[bg1][4v]xfade=transition=custom:expr='if(gt(P, abs(X/W - 0.5)), A, B)':duration=1:offset=23" -y -r 12 black_bg.mp4
+ffmpeg  -i /opt/application/tx-rtcStream/files/resources/20_input.mp4  -ss 0 -t 20 -i /opt/application/tx-rtcStream/files/resources/forest.mp4 -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/video2.mp4 -filter_complex "color=c=black:s=320x240:r=30:d=5[bg];[0:v]crop=iw/3:ih:2*iw/3:0[0v];[1:v]crop=iw/3:ih:2*iw/3:0[1v];[2:v]crop=2*iw/4:ih/2:iw/2:ih/3[2v];[bg][0v]overlay=0:0[ov0];[ov0][1v]overlay=W/3[ov1];[ov1][2v]overlay=W/3:H/2,settb=expr='1/20'[bg0];[3:v]scale=320:240,setsar=sar='1:1',fps=fps=30,settb=1/20[3v];[4:v]scale=320:240,setsar=1:1,fps=30,settb=1/20[4v];[bg0][3v]xfade=transition=circleclose:duration=2:offset=13[bg1];[bg1][4v]xfade=transition=custom:expr='if(gt(P, abs(X/W - 0.5)), A, B)':duration=1:offset=23" -y -r 12 black_bg.mp4
 
 
 ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4  -filter_complex "[0:v]null[0v];[0v][0v]concat=n=2:v=1:a=0" -y concat_same.mp4
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -vf "geq=r='X/W*r(X,Y)':g='(1-X/W)*g(X,Y)':b='(H-Y)/H*b(X,Y)'" -y geq.mp4
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -vf "geq=lum_expr='(p(X,Y)+(256-p(X-4,Y-4)))/2'" -y geq_emboss.mp4
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -vf "geq=lum_expr='p(X,Y)*gauss((X/W-0.5)*3)*gauss((Y/H-0.5)*3)/gauss(0)/gauss(0)'" -y geq_emboss.mp4
+
+
+# 剪映工程文件在 C:\Users\eddie\AppData\Local\JianyingPro\User Data\Projects 可以看到具体的工程信息
+
+ffmpeg  -re -i /opt/application/tx-rtcStream/files/resources/40_input.mp4 -re -i /opt/application/tx-rtcStream/files/resources/forest.mp4 -re -i /opt/application/tx-rtcStream/files/resources/dog_couch_orig.jpg -re -i /opt/application/tx-rtcStream/files/resources/dh.mp4  -re -ss 5 -t 30 -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -filter_complex "color=c=blue:s=640x480:r=30:d=50[blackBg];[0:v]null[region_0.0.0];[1:v]null[region_0.0.1];[2:v]null[region_0.0.2];[3:v]null[region_3.0.1];[region_0.0.0]geq=lum='(lum(X,Y)+(256-lum(X-4,Y-4)))/2':cr='(cr(X,Y)+(256-cr(X-6,Y-6)))/2':cb='(cb(X,Y)+(256-cb(X-8,Y-8)))/2',crop=w=iw/3:h=ih:x=2*iw/3:y=0,scale=w=214:h=480[region_0.0.0_prepro];[region_0.0.1]scale=w=428:h=240[region_0.0.1_prepro];[region_0.0.2]crop=w=iw:h=ih:x=0:y=0,zoompan=z='if(between(time,0,6),min(max(zoom,pzoom)+0.015,4),1)':d=480:x=1*iw/3-(1*iw/zoom/3):y=2*ih/4-(2*ih/zoom/4),scale=w=428:h=240[region_0.0.2_prepro];[region_3.0.1]crop=w=300:h=300:x=130:y=130,scale=w=100:h=100,chromakey=color=0x00ff00:similarity=0.3:blend=0.05[region_3.0.1_prepro];[blackBg][region_0.0.0_prepro]overlay=0:0[out0];[out0][region_0.0.1_prepro]overlay=x=W/3:y=0[out1];[out1][region_0.0.2_prepro]overlay=x=W/3:y=H/2,settb='1/20'[out2];[4:v]scale=640:480,setsar=1:1,fps=30,settb=1/20[7v];[out2][7v]xfade=transition=circleclose:duration=2:offset=15[trans0];[trans0][region_3.0.1_prepro]overlay=x='if(between(t,0,5),0,if(between(t,5,10),(500/5/30)*(n-150),500))':y='if(gte(t,0)*lt(t,10),(H-h),if(between(t,10,12),(H-h)-(H-h-0)/2/30*(n-300),0))'[out3];[out3]subtitles=filename=/opt/application/tx-rtcStream/files/resources/subtitles.srt:force_style='Fontsize=18,PrimaryColour=&H0230bf&'[outText_region_3.0.0]" -map "[outText_region_3.0.0]" -c:v libx   -b:v 500k -deadline 1 -cpu-used 2 -r 30 -vsync drop -auto-alt-ref 0 -y aha.mp4
+
+# LUT （look up table) 调色
+# https://www.rocketstock.com/free-after-effects-templates/35-free-luts-for-color-grading-videos/
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/image2.jpg -vf lut3d="/opt/dev/rtcSdk/files/LUT/McKinnon 75.CUBE" -y lut.jpg
+
+
+ffmpeg -i input.mp4 -vf vidstabdetect=stepsize=6:shakiness=8:accuracy=9:result=transform_vectors.trf -f null -
+ffmpeg -i input.mp4 -vf vidstabtransform=input=transform_vectors.trf:zoom=1:smoothing=30,unsharp=5:5:0.8:3:3:0.4 -vcodec libx264 -preset slow -tune film -crf 18 output.mp4
+
+# 在视频前后增加黑色 （slug），tpad 滤镜， 可以用以非零点的视频合成
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -filter_complex "tpad=stop_duration=20:start_duration=20:color=red,fade=type=in:st=20:d=2,fade=type=out:st=38:d=2" -y tpad.mp4
+
+ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -ss 30 -t 10 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[1]asetpts=PTS+3000/TB[a1];[0][a1]amix=inputs=2:weights='5 1'" -y amix.mp3
+
+
+# 延迟视频中的音频
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/audio_10sOffice.mp4 -af "asetpts='if(lt(T\,0.1),PTS,PTS+4/TB)',aresample=async=1" -c:v copy -y asetpts.mp4
+
+
+ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -ss 30 -t 10 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[0]afade=t=out:st=7:d=3,apad=pad_dur=3[a0];[a0][1]concat=n=2:v=0:a=1" -y concat_apad.mp3
+
+# 对齐音视频（自动在音频尾部添加静音）
+ffmpeg  -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -filter_complex "[1:0]apad" -shortest audio_align.mp4
+
+#在音频头部添加静音（aevalsrc, concat)
+ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -filter_complex "aevalsrc=0:d=5[s];[s][0:a]concat=n=2:v=0:a=1" -y audio_aevalsrc.mp3
+
+# 音频转场
+ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -ss 30 -t 10 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[0][1]acrossfade=duration=2:curve1=hsin:curve2=log" -y audio_acrossfade.mp3
+
+
+# 改变音频音量（volume , between)
+ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -ss 30 -t 10 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[0]volume=4:enable='between(t,2,5)'[a0];[a0][1]acrossfade=duration=2:curve1=hsin:curve2=log" -y audio_volume.mp3
