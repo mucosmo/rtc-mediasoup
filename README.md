@@ -11,15 +11,17 @@
 ## 安装
 
 ```bash
-git clone git@github.com:YiruAI/rtc-mediasoup.git
+# 克隆 alpha 分支 （根据情况定）
+git clone -b alpha git@github.com:YiruAI/rtc-mediasoup.git
 cd server
 npm install
 ```
 
 >**Warning**
->可能在 post install script 阶段卡在某些包无法下载, 可以把预先下载好的包>复制到指定文件夹中
+>可能在 post install script 阶段卡在某些包无法下载, 需要把预先下载好的包复制到指定文件夹中
 
 ```bash
+unzip /opt/dev/rtcSdk/server/packagecache.zip
 rm -r ./node_modules/mediasoup/worker/subprojects/packagecache/*
 cp ./packagecache/* ./node_modules/mediasoup/worker/subprojects/packagecache
 ```
