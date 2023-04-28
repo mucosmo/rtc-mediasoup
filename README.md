@@ -1,12 +1,14 @@
 # TX-RTCStream
 
-## linux 系统下软件准备
+## linux 软件需求
 
 1. redis 5.0+ (redis-cli -v)
 2. mysql 5.7+ (mysql --version)
 3. ffmpeg 5.0+ (ffmpeg -version) [安装指南](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu)
 4. gstreamer 1.16+ (gst-launch-1.0 --version) [安装指南](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html?gi-language=c)
 5. nginx 1.18+ (nginx -v)
+
+
 
 ## 安装
 
@@ -21,9 +23,18 @@ npm install
 >可能在 post install script 阶段卡在某些包无法下载, 需要把预先下载好的包复制到指定文件夹中
 
 ```bash
-unzip /opt/dev/rtcSdk/server/packagecache.zip
+unzip ./packagecache.zip
 rm -r ./node_modules/mediasoup/worker/subprojects/packagecache/*
 cp ./packagecache/* ./node_modules/mediasoup/worker/subprojects/packagecache
+```
+
+## 参数配置
+
+```bash
+# 生成 env 文件，然后根据服务器实际情况配置
+mv .env.example .env
+# 根据服务器开放端口配置 config.js 文件
+./server/config.js
 ```
 
 ## 运行
