@@ -1,24 +1,39 @@
 # TX-RTCStream
 
-## Installation
+## linux 系统下软件准备
 
-1. server
+1. redis 5.0+ (redis-cli -v)
+2. mysql 5.7+ (mysql --version)
+3. ffmpeg 5.0+ (ffmpeg -version) [安装指南](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu)
+4. gstreamer 1.16+ (gst-launch-1.0 --version) [安装指南](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html?gi-language=c)
+5. nginx 1.18+ (nginx -v)
+
+## 安装
 
 ```bash
-$ cd server
-$ git checkout alpha
-$ npm install
+git clone git@github.com:YiruAI/rtc-mediasoup.git
+cd server
+npm install
 ```
 
-可能在 post install script 阶段卡在某些包无法下载, 可以把预先下载好的包复制到指定文件夹中（ postinstall 时多次尝试复制）
+>**Warning**
+>可能在 post install script 阶段卡在某些包无法下载, 可以把预先下载好的包>复制到指定文件夹中
 
 ```bash
 rm -r ./node_modules/mediasoup/worker/subprojects/packagecache/*
-$ cp ./packagecache/* ./node_modules/mediasoup/worker/subprojects/packagecache
-$ npm rebuild
+cp ./packagecache/* ./node_modules/mediasoup/worker/subprojects/packagecache
 ```
 
-2. app
+## 运行
+
+```bash
+cd server
+npm run start
+```
+
+## 问题汇总
+
+1. app
 
 ```bash
 $ cd app
@@ -35,8 +50,6 @@ $ npm install
 $ npm config set registry https://registry.npmmirror.com
 $ npm i --legacy-peer-deps
 ```
-
-## Run
 
 ### server
 
