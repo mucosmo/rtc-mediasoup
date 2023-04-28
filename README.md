@@ -1,4 +1,4 @@
-# TX-RTCStream
+# rtc-mediasoup
 
 ## linux 软件需求
 
@@ -19,7 +19,7 @@ cd server
 npm install
 ```
 
->**Warning**
+>**Note**
 >可能在 post install script 阶段卡在某些包无法下载, 需要把预先下载好的包复制到指定文件夹中
 
 ```bash
