@@ -13,8 +13,7 @@
 ## 安装
 
 ```bash
-# 克隆 alpha 分支 （根据情况定）
-git clone -b alpha git@github.com:YiruAI/rtc-mediasoup.git
+git clone git@github.com:YiruAI/rtc-mediasoup.git
 cd server
 npm install
 ```
