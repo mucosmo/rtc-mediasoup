@@ -1,0 +1,1 @@
+[1]null[region_2.0.1];[region_2.0.1]crop=w=3000:h=1900:x=0:y=0,scale=w=-1:h=1900,zoompan=z='min(zoom+0.0015,1.5)':d=1000:x=100:y=100[region_2.0.1_prepro];[0][region_2.0.1_prepro]overlay=0:0

@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "fifo",
+            "type": "cppdbg",
+            "preLaunchTask": "build",
+            "request": "launch",
+            "program": "${workspaceFolder}/lab/clan/filter/transcoding",
+            "args": ["/opt/application/tx-rtcStream/files/resources/office10s.mp4", "/opt/application/tx-rtcStream/files/synthesis/c-133.mp4"],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "rtp",
+            "type": "cppdbg",
+            "preLaunchTask": "rtp",
+            "request": "launch",
+            "program": "${workspaceFolder}/lab/clan/filter/send_by_rtp",
+            "args": ["/opt/application/tx-rtcStream/files/resources/office10s.mp4", "rtmp://121.5.133.154:1935/myapp/12345"],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+
+
+    ]
+}
