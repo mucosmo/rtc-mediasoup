@@ -37,4 +37,4 @@ class RedisService {
 }
 
 /**signleton */
-exports.RedisService = new RedisService();
+exports.redis = new RedisService();

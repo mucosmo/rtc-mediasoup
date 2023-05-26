@@ -1,126 +1,178 @@
-# mediasoup-demo v3
+# rtc-mediasoup
 
-A demo application of [mediasoup](https://mediasoup.org) **v3**.
+## linux 软件需求
 
-Try it online at https://v3demo.mediasoup.org.
-
-
-## Resources
-
-* mediasoup website and documentation: [mediasoup.org](https://mediasoup.org)
-* mediasoup support forum: [mediasoup.discourse.group](https://mediasoup.discourse.group)
+1. redis 5.0+ (redis-cli -v)
+2. mysql 5.7+ (mysql --version)
+3. ffmpeg 5.0+ (ffmpeg -version) [安装指南](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu)
+4. gstreamer 1.16+ (gst-launch-1.0 --version) [安装指南](https://gstreamer.freedesktop.org/documentation/installing/on-linux.html?gi-language=c)
+5. nginx 1.18+ (nginx -v)
 
 
-## Installation
 
-* Clone the project:
+## 安装
 
 ```bash
-$ git clone https://github.com/versatica/mediasoup-demo.git
-$ cd mediasoup-demo
-$ git checkout v3
+git clone git@github.com:YiruAI/rtc-mediasoup.git
+cd server
+npm install
 ```
 
-* Ensure you have installed the [dependencies](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) required by mediasoup to build.
-
-* Set up the mediasoup-demo server:
+>**Note**
+>可能在 post install script 阶段卡在某些包无法下载, 需要把预先下载好的包复制到指定文件夹中
 
 ```bash
-$ cd server
+unzip ./packagecache.zip
+rm -r ./node_modules/mediasoup/worker/subprojects/packagecache/*
+cp ./packagecache/* ./node_modules/mediasoup/worker/subprojects/packagecache
+```
+
+## 参数配置
+
+```bash
+# 生成 env 文件，然后根据服务器实际情况配置
+mv .env.example .env
+# 根据服务器开放端口配置 config.js 文件
+./server/config.js
+```
+
+## 运行
+
+```bash
+cd server
+npm run start
+```
+
+## 问题汇总
+
+1. app
+
+```bash
+$ cd app
+$ git checkout alpha
 $ npm install
 ```
 
-* Copy `config.example.js` as `config.js` and customize it for your scenario:
+可能报错：
+>Invalid tag name ">=^16.0.0": Tags may not have any characters that encodeURIComponent encodes. package: mediasoup-demo-app@3.0.0 › react-tooltip@^3.11.1 › react
+
+解决方法：
 
 ```bash
-$ cp config.example.js config.js
+$ npm config set registry https://registry.npmmirror.com
+$ npm i --legacy-peer-deps
 ```
 
-**NOTE:** To be perfectly clear, "customize it for your scenario" is not something "optional". If you don't set proper values in `config.js` the application **won't work**.
-
-* Set up the mediasoup-demo browser app:
+### server
 
 ```bash
-$ cd app
-$ npm install
+git checkout alpha
+cd server
+npm start
 ```
 
-
-## Run it locally
-
-* Run the Node.js server application in a terminal:
+### client
 
 ```bash
-$ cd server
-$ npm start
+git checkout alpha
+cd app
+npm start
 ```
 
-* In a different terminal build and run the browser application:
+then open the browser and visit `chrome://webrtc-internals/` to see the webrtc status
+
+### video synthesis in C language
 
 ```bash
-$ cd app
-$ npm start
+# get into the dir
+$ cd server/clan/filter
+# filter parameters
+$ cp input_bak.txt input.txt
+# build the C source code
+$ ./build.sh
+# video composite
+$ ./shtranscoding.sh 
 ```
 
-* Enjoy.
+### push stream rtmp server
 
-
-## Deploy it in a server
-
-* Globally install `gulp-cli` NPM module (may need `sudo`):
+1. install software  [VLC media player](https://www.videolan.org/vlc/)  and [mediainfo](https://mediaarea.net/en/MediaInfo)
+2. start rtmp server: start nginx with nginx-rtmp-module-master
+3. now rtmp server start at  rtmp://121.5.133.154:1935/myapp/12345
 
 ```bash
-$ npm install -g gulp-cli
+cd /opt/program/nginx/sbin
+sudo ./nginx -c /opt/program/nginx/conf/nginx.conf
 ```
 
-* Build the production ready browser application:
+### push/pull stream with rtc room
+
+1. the control server repository is [here](https://github.com/mucosmo/tx-rtcStream)
+
+## Bugs
+
+1. 第三方服务可能停止，需要做处理， 比如调用 ASR 服务（60102）
+2. 及时停止 asr 服务
+3. 推送数字人后，刷新房间，数字人没有了
+4. 蒙版头像去背景没有作用
+5. ffmpeg 中 scale 的动态参数（n,t,pos）无法使用
+6. filter graph 重新初始化时 n , t 等参数会重新开始
+7. init_filters() in clan/filter/transcoding.c takes ~200ms, it is intolerable, the time should be reduced to less than 20ms.
+
+## Tips
+
+1. free memory when necessary: `sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"`;
+2. kill all process started by gst-launch: `ps -ef | grep gst-launch | awk '{ print $2 }' | xargs kill -9`
+
+## Notices
+
+* 更改了如下文件 `aiortc/node_modules/mediasoup-client-aiortc/lib/FakeRTCDataChannel.js` 中的
+
+```js
+this._readyState = 'open'; // 原值为 status.readyState
+```
+
+* m3u8, hls 格式进行推流服务提供给用户
+* 当前由 gst 发起的进程没有及时 kill
+
+```shell
+ps -ef | grep gst-launch | awk '{ print $2 }' | xargs kill -9
+```
+
+* ffmpeg filter 中参数名称可省略，此时需按照默认顺序填写
+* AsrSDK 的输入是 `audio/x-raw,format=S16LE,channels=1,rate=16000` 的 PCM 格式文件（或者其他）
+
+* generate a rtp strema and replay it
 
 ```bash
-$ cd app
-$ gulp dist
+# generate mp4 file
+$ ffmpeg -f lavfi -i testsrc=duration=60:size=320x240:rate=30 -pix_fmt yuv420p -c:v libx264 -preset ultrafast -tune zerolatency 60_input.mp4
+$ ffmpeg -re -i 40_input.mp4 -c:v libx264 -preset medium -b:v 1000k -maxrate 1500k -bufsize 2000k -c:a aac -b:a
+ 128k -ac 2 -f rtp rtp://127.0.0.1:5004 -sdp_file 40_input.sdp 
+$ ffplay -protocol_whitelist rtp,udp,file -i 40_input.sdp
 ```
 
-* Upload the entire `server` folder to your server and make your web server (Apache, Nginx, etc) expose the `server/public` folder.
-
-* Edit your `server/config.js` with appropriate settings (listening IP/port, logging options, **valid** TLS certificate, etc).
-
-* Within your server, run the Node.js application by setting the `DEBUG` environment variable according to your needs ([more info](https://mediasoup.org/documentation/v3/mediasoup/debugging/)):
+* send to rtc room over rtp
 
 ```bash
-$ DEBUG="*mediasoup* *ERROR* *WARN*" node server.js
+$ ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m529869779763201 -map 0:v -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10037
+$ ffmpeg -protocol_whitelist tcp,rtmp,udp -i rtmp://liveplay.ivh.qq.com/live/m577640251523073  -filter_complex '[0:v]boxblur=10:1[v0]' -map [v0] -c:v vp8 -b:v 1000k -deadline 1 -cpu-used 4 -ssrc 2222 -payload_type 101 -f rtp rtp://121.5.133.154:10041
 ```
-* If you wish to run it as daemon/service you can use [pm2](https://www.npmjs.com/package/pm2) process manager. Or you can dockerize it among other options.
 
-* The Node.js application exposes an interactive terminal. When running as daemon (in background) the host administrator can connect to it by entering into the `server` folder and running:
+## Issues in development
+
+1. npm run start
 
 ```bash
-$ npm run connect
+Error: The module '/opt/application/tx-rtcStream/server/node_modules/.pnpm/heapdump@0.3.15/build/Release/addon.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 108. This version of Node.js requires
+NODE_MODULE_VERSION 93. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
 ```
 
-## Run mediasoup server with Docker
+2. app -> npm start failed 
 
-* Required environment variables: [server/DOCKER.md](server/DOCKER.md).
-* Build the Docker image: [server/docker/build.sh](server/docker/build.sh).
-* Run the Docker image: [server/docker/run.sh](server/docker/run.sh).
+## Logs
 
-```
-$ cd server
-$ docker/build.sh
-$ MEDIASOUP_ANNOUNCED_IP=192.168.1.34 ./docker/run.sh
-```
-
-### Considerations for (config.js)[server/config.example.js]
-
-* Make sure [https.listenIp](server/config.example.js#L20) is set to `0.0.0.0`.
-* Make sure [TLS certificates](server/config.example.js#L24) reside in `server/certs` directory with names `fullchain.pem` and `privkey.pem`.
-* The default mediasoup port range is just 2000-2020, which is not suitable for production. You should increase it, however you should then run the container in `network="host"` mode.
-
-## Authors
-
-* Iñaki Baz Castillo [[website](https://inakibaz.me)|[github](https://github.com/ibc/)]
-* José Luis Millán Villegas [[github](https://github.com/jmillan/)]
-
-
-## License
-
-MIT
+* 2023-2-15: both app and server are ok

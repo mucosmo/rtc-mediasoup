@@ -407,3 +407,8 @@ ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 
 
 # 改变音频音量（volume , between)
 ffmpeg -ss 20 -t 10 -i /opt/application/tx-rtcStream/files/resources/稻香.mp3 -ss 30 -t 10 -i /opt/application/tx-rtcStream/files/resources/彩虹.mp3 -filter_complex "[0]volume=4:enable='between(t,2,5)'[a0];[a0][1]acrossfade=duration=2:curve1=hsin:curve2=log" -y audio_volume.mp3
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/mask.png -filter_complex "[1:v]geq='if(gt(lum(X,Y),128),255,0)',scale=320:240[mask];[0:v][mask]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2" -c:a copy -y mask_geq.mp4
+
+
+ffmpeg -i /opt/application/tx-rtcStream/files/resources/20_input.mp4 -i /opt/application/tx-rtcStream/files/resources/mask.png -filter_complex "[1:v]scale=320:240[mask];[0:v][mask]overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:enable='gt(alpha,0)'" -c:a copy -y mask_geq.mp4
