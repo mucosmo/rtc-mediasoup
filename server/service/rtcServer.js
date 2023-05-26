@@ -191,7 +191,7 @@ class RtcServer {
             global.processObj[sessionId] = { roomId: params.roomId, broadcasterId: params.peerId };
         }
         global.processObj[sessionId]['pid'] = [];
-        const pid = FfmpegCommand.execCommand(params.command, sessionId, { mediaType: 'video', peerId: params.peerId, roomId: params.roomId });
+        const pid = FfmpegCommand.execCommand(params.command, sessionId, { mediaType: 'video', peerId: params.peerId, roomId: params.roomId, duration:params.duration });
         global.processObj[sessionId]['pid'].push(pid);
         return global.processObj;
     }

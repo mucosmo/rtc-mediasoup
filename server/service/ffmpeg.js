@@ -3,6 +3,8 @@ const { StreamSession } = require('./session');
 
 const { activeSpeaker } = require('../service/vad');
 
+const { redis } = require('./redis');
+
 global.ffmpegStats = {};
 
 global.ffmpegData = null;
@@ -31,7 +33,8 @@ class FfmpegCommand {
         console.log('------- params:', params)
         const cp = exec(command);
         cp.stderr.on('data', data => {
-            // console.log('---data', data)
+            console.log('-- ffmpeg data:', data)
+            progress(params, data)
             if (params.peerId.includes('mixer')) {
                 const peerId = global.mixerMap.get(params.roomId);
                 if (peerId) {
@@ -123,6 +126,15 @@ function parseTime(data) {
         ret = hours * 3600 + minutes * 60 + seconds;
     }
     return ret;
+}
+
+function progress(user, data) {
+    const seconds = parseTime(data);
+    const progress = seconds / user.duration;
+    const key = `ppt2videoProgress:${user.roomId}_${user.peerId}`;
+    if (progress > 0) {
+        redis.set(key, progress, 24 * 60 * 60);
+    }
 }
 
 module.exports.FfmpegCommand = FfmpegCommand;
