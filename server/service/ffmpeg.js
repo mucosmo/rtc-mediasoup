@@ -24,7 +24,7 @@ class FfmpegCommand {
         if (params.peerId.includes('mixer')) {
             global.mixerStart.get(params.roomId) || global.mixerStart.set(params.roomId, new Date().getTime());
             const preSession = global.preSession.get(params.roomId);
-            if(preSession){
+            if (preSession) {
                 const streamSession = new StreamSession({ sessionId: preSession });
                 streamSession.close();
             }
@@ -133,8 +133,9 @@ function progress(user, data) {
     const progress = seconds / user.duration;
     const key = `ppt2videoProgress:${user.roomId}_${user.peerId}`;
     if (progress > 0) {
-        redis.set(key, progress, 24 * 60 * 60);
+        redis.set(key, JSON.stringify({ progress, occupied: progress < 0.95 ? true : false }), 24 * 60 * 60);
     }
+
 }
 
 module.exports.FfmpegCommand = FfmpegCommand;
